@@ -1,0 +1,53 @@
+<form class="product-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  @if (mode() === 'NEW_VERSION') {
+    <p class="product-form__context">Se creará un registro activo con un nuevo identificador. El anterior quedará inactivo y conservará sus datos. Las existencias se mantienen sin ajustes.</p>
+  }
+  <div class="product-form__field">
+    <label class="product-form__label" for="product-name">Nombre</label>
+    <input class="product-form__input" id="product-name" type="text" formControlName="nombre" required
+      [attr.aria-invalid]="invalid('nombre')" aria-describedby="product-name-error" />
+    <span class="product-form__error" id="product-name-error">@if (invalid('nombre')) { Escribe el nombre del producto. }</span>
+  </div>
+  <div class="product-form__field">
+    <label class="product-form__label" for="product-category">Categoría</label>
+    <select class="product-form__select" id="product-category" formControlName="categoria" required
+      [attr.aria-invalid]="invalid('categoria')" aria-describedby="product-category-error">
+      <option value="">Selecciona una categoría</option>
+      @for (category of categories; track category) { <option [value]="category">{{ category }}</option> }
+    </select>
+    <span class="product-form__error" id="product-category-error">@if (invalid('categoria')) { Selecciona una categoría. }</span>
+  </div>
+  <div class="product-form__field">
+    <label class="product-form__label" for="product-price">Precio de venta (MXN)</label>
+    <input class="product-form__input" id="product-price" type="number" min="0.01" max="999999999.99" step="0.01"
+      formControlName="precioVenta" required [attr.aria-invalid]="invalid('precioVenta')" aria-describedby="product-price-error" />
+    <span class="product-form__error" id="product-price-error">@if (invalid('precioVenta')) { Usa un precio mayor que cero, con hasta dos decimales y menor a mil millones. }</span>
+  </div>
+  <div class="product-form__field">
+    <label class="product-form__label" for="product-stock">{{ mode() === 'CREATE' ? 'Cantidad inicial' : 'Stock actual (sin cambios)' }}</label>
+    <input class="product-form__input" id="product-stock" type="number" min="0" max="999999999" step="1"
+      formControlName="stockActual" required [readOnly]="mode() === 'NEW_VERSION'"
+      [attr.aria-invalid]="invalid('stockActual')" aria-describedby="product-stock-error" />
+    <span class="product-form__error" id="product-stock-error">@if (invalid('stockActual')) { Usa un entero entre 0 y 999999999. }</span>
+  </div>
+  <div class="product-form__field">
+    <label class="product-form__label" for="product-minimum">Stock mínimo</label>
+    <input class="product-form__input" id="product-minimum" type="number" min="0" max="999999999" step="1"
+      formControlName="stockMinimo" required [attr.aria-invalid]="invalid('stockMinimo')" aria-describedby="product-minimum-error" />
+    <span class="product-form__error" id="product-minimum-error">@if (invalid('stockMinimo')) { Usa un entero entre 0 y 999999999. }</span>
+  </div>
+  <div class="product-form__field">
+    <label class="product-form__label" for="product-description">Descripción (opcional)</label>
+    <textarea class="product-form__textarea" id="product-description" formControlName="descripcion" rows="2"></textarea>
+  </div>
+  <div class="product-form__field">
+    <label class="product-form__label" for="product-image">URL o ruta de imagen (opcional)</label>
+    <input class="product-form__input" id="product-image" type="text" formControlName="imagen" placeholder="/images/latte.jpg"
+      [attr.aria-invalid]="invalid('imagen')" aria-describedby="product-image-error" />
+    <span class="product-form__error" id="product-image-error">@if (invalid('imagen')) { Usa una URL http/https o una ruta de imagen sin espacios. }</span>
+  </div>
+  <footer class="product-form__actions">
+    <button class="product-form__button product-form__button--secondary" type="button" (click)="cancel.emit()">Cancelar</button>
+    <button class="product-form__button" type="submit">{{ mode() === 'CREATE' ? 'Registrar producto' : 'Crear nueva versión' }}</button>
+  </footer>
+</form>

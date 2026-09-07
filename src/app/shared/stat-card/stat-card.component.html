@@ -1,0 +1,12 @@
+<article class="stat-card">
+  <div class="stat-card__header">
+    <span class="stat-card__label">{{ label() }}</span>
+    <span class="stat-card__icon" aria-hidden="true"><ng-content select="[stat-card-icon]" /></span>
+  </div>
+  <div class="stat-card__content">
+    <p class="stat-card__value">{{ value() }}</p>
+    @if (detail()) {
+      <p class="stat-card__detail">{{ detail() }}</p>
+    }
+  </div>
+</article>

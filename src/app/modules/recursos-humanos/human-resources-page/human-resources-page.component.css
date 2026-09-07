@@ -1,0 +1,201 @@
+.human-resources {
+	display: grid;
+	gap: 24px;
+	min-width: 0;
+}
+
+.human-resources__button {
+	padding: 10px 16px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background-color: var(--color-primary-dark);
+	color: var(--color-surface);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.human-resources__button:hover:not(:disabled) {
+	background-color: var(--color-primary-hover);
+}
+
+.human-resources__button--secondary {
+	border-color: var(--color-border);
+	background-color: var(--color-surface);
+	color: var(--color-primary-dark);
+}
+
+.human-resources__button--secondary:hover:not(:disabled) {
+	background-color: var(--color-primary-light);
+}
+
+.human-resources__button:disabled {
+	background-color: var(--color-surface-secondary);
+	color: var(--color-text-secondary);
+	cursor: default;
+}
+
+.human-resources__notice {
+	margin: 0;
+	padding: 14px 18px;
+	border-radius: 12px;
+	background-color: var(--color-primary-light);
+	color: var(--color-primary-dark);
+}
+
+.human-resources__notice:empty {
+	display: none;
+}
+
+.human-resources__section, .human-resources__payments {
+	min-width: 0;
+}
+
+.human-resources__role {
+	display: block;
+	margin-top: 4px;
+	color: var(--color-text-secondary);
+	font-size: 12px;
+}
+
+.human-resources__amount {
+	white-space: nowrap;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.human-resources__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.human-resources__text-button {
+	padding: 8px 10px;
+	border: 0;
+	border-radius: 8px;
+	background-color: var(--color-primary-light);
+	color: var(--color-primary-dark);
+	white-space: nowrap;
+	font-size: 12px;
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.human-resources__text-button--danger {
+	background-color: color-mix(in srgb, var(--color-secondary) 18%, var(--color-surface));
+	color: var(--color-text-primary);
+}
+
+.human-resources__text-button:hover {
+	background-color: var(--color-surface-secondary);
+}
+
+.human-resources__personal {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 24px;
+}
+
+.human-resources__profile, .human-resources__schedule {
+	padding: 24px;
+	border: 1px solid var(--color-border);
+	border-radius: 16px;
+	background-color: var(--color-surface);
+}
+
+.human-resources__profile {
+	background-color: color-mix(in srgb, var(--color-primary-light) 35%, var(--color-surface));
+}
+
+.human-resources__schedule {
+	border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+}
+
+.human-resources__eyebrow {
+	margin: 0 0 8px;
+	color: var(--color-text-secondary);
+	font-size: 13px;
+}
+
+.human-resources__title {
+	margin: 0;
+	color: var(--color-primary-dark);
+	font-size: 20px;
+}
+
+.human-resources__details {
+	display: grid;
+	gap: 16px;
+	margin: 20px 0 0;
+	font-size: 14px;
+}
+
+.human-resources__detail-row {
+	display: flex;
+	justify-content: space-between;
+	gap: 20px;
+}
+
+.human-resources__detail-row dt {
+	color: var(--color-text-secondary);
+}
+
+.human-resources__detail-row dd {
+	margin: 0;
+	text-align: right;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
+.human-resources__week {
+	margin: 18px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.human-resources__day {
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+	padding: 12px 0;
+	border-bottom: 1px solid var(--color-divider);
+	font-size: 14px;
+}
+
+.human-resources__attendance {
+	display: grid;
+	gap: 20px;
+	min-width: 0;
+}
+
+.human-resources__attendance-card {
+	padding: 24px;
+	border: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+	border-radius: 16px;
+	background-color: var(--color-primary-light);
+}
+
+.human-resources__today {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 24px 48px;
+	margin: 20px 0;
+	font-size: 14px;
+}
+
+.human-resources__today dt {
+	color: var(--color-text-secondary);
+}
+
+.human-resources__today dd {
+	margin: 8px 0 0;
+	font-weight: 700;
+	color: var(--color-primary-dark);
+}
+
+@media (max-width: 900px) {
+	.human-resources__personal {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

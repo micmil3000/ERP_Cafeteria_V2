@@ -1,0 +1,106 @@
+<aside class="sidebar" aria-label="Savia Café ERP">
+	<header class="sidebar__header">
+		<div class="sidebar__brand" title="Savia Café ERP">
+			<span class="sidebar__brand-icon">
+				<svg viewBox="0 0 24 24" aria-hidden="true">
+					<path d="M4 9h13v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4Z M17 10h2a3 3 0 0 1 0 6h-2 M8 3v2 M12 2v3 M3 22h15" />
+				</svg>
+			</span>
+
+			<div class="sidebar__brand-text">
+				<span>Savia Café</span>
+				<small>ERP</small>
+			</div>
+		</div>
+
+		<button
+			class="sidebar__close"
+			type="button"
+			aria-label="Ocultar menú lateral"
+			title="Ocultar menú"
+			(click)="closeSidebar.emit()"
+		>
+			<svg viewBox="0 0 24 24" aria-hidden="true">
+				<path d="M18 6 6 18 M6 6l12 12" />
+			</svg>
+		</button>
+	</header>
+
+	<nav class="sidebar__navigation" aria-label="Navegación principal">
+		@for (item of visibleNavigation; track item.label) {
+			@if (item.route !== null) {
+				<a
+					class="sidebar__nav-item"
+					[routerLink]="item.route"
+					routerLinkActive="sidebar__nav-item--active"
+					[routerLinkActiveOptions]="{ exact: true }"
+					ariaCurrentWhenActive="page"
+					[attr.aria-label]="item.label"
+					[title]="item.label"
+				>
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<path [attr.d]="item.icon" />
+					</svg>
+
+					<span class="sidebar__nav-label">
+						{{ item.label }}
+					</span>
+				</a>
+			} @else {
+				<button
+					class="sidebar__nav-item"
+					type="button"
+					disabled
+					[attr.aria-label]="item.label"
+					[title]="item.label + ' — Próximamente'"
+				>
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<path [attr.d]="item.icon" />
+					</svg>
+
+					<span class="sidebar__nav-label">
+						{{ item.label }}
+					</span>
+				</button>
+			}
+		}
+	</nav>
+
+	<footer class="sidebar__footer">
+		<div
+			class="sidebar__user"
+			[attr.aria-label]="'Ana, ' + roleLabel"
+			[title]="'Ana · ' + roleLabel"
+		>
+			<span class="sidebar__avatar" aria-hidden="true">
+				AT
+			</span>
+
+			<div class="sidebar__user-details">
+				<span class="sidebar__name">
+					Ana
+				</span>
+
+				<span class="sidebar__role">
+					{{ roleLabel }}
+				</span>
+			</div>
+		</div>
+
+		<button
+			class="sidebar__nav-item sidebar__nav-item--logout"
+			type="button"
+			routerLink="/login"
+			aria-label="Cerrar sesión"
+			title="Cerrar sesión"
+		>
+			<svg viewBox="0 0 24 24" aria-hidden="true">
+				<path d="M9 21H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5 M10 12h11 M17 8l4 4-4 4" />
+			</svg>
+
+			<span class="sidebar__nav-label">
+				Cerrar sesión
+			</span>
+		</button>
+	</footer>
+</aside>

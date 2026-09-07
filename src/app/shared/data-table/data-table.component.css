@@ -1,0 +1,68 @@
+app-data-table {
+	display: block;
+	min-width: 0;
+}
+
+app-data-table .data-table {
+	overflow: hidden;
+	border: 1px solid var(--color-border);
+	border-radius: 16px;
+	background-color: var(--color-surface);
+}
+
+app-data-table .data-table__wrapper {
+	overflow-x: auto;
+}
+
+app-data-table .data-table__table {
+	width: 100%;
+	border-collapse: collapse;
+	text-align: left;
+	font-size: 14px;
+	color: var(--color-text-primary);
+}
+
+app-data-table .data-table__head {
+	background-color: var(--color-surface-secondary);
+}
+
+app-data-table .data-table__header {
+	padding: 16px 20px;
+	color: var(--color-text-secondary);
+	font-size: 12px;
+	font-weight: 700;
+	text-align: left;
+	white-space: nowrap;
+}
+
+app-data-table .data-table__row {
+	height: 56px;
+}
+
+app-data-table .data-table__body .data-table__row:hover {
+	background-color: color-mix(in srgb, var(--color-surface-secondary) 40%, var(--color-surface));
+}
+
+app-data-table .data-table__cell {
+	padding: 14px 20px;
+	border-top: 1px solid var(--color-divider);
+	vertical-align: middle;
+}
+
+app-data-table .data-table__actions {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+app-data-table .data-table__empty {
+	padding: 32px 20px;
+	border-top: 1px solid var(--color-divider);
+	color: var(--color-text-secondary);
+	text-align: center;
+}
+
+app-data-table .data-table--empty tbody:not(.data-table__empty-body) {
+	display: none;
+}

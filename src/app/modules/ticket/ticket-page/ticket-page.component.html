@@ -1,0 +1,72 @@
+<section class="ticket" aria-label="Comprobante de venta">
+  @if (sale; as currentSale) {
+    <article class="ticket__receipt" aria-labelledby="ticket-brand">
+      <header class="ticket__brand">
+        <span class="ticket__logo" aria-hidden="true">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 9h13v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4Z M17 10h2a3 3 0 0 1 0 6h-2 M8 3v2 M12 2v3 M3 22h15" />
+          </svg>
+        </span>
+        <h1 class="ticket__brand-name" id="ticket-brand">Savia Café</h1>
+        <p class="ticket__subtitle">Comprobante de venta</p>
+        <p class="ticket__sale-number">Venta #{{ currentSale.id }}</p>
+      </header>
+
+      <dl class="ticket__meta">
+        <div class="ticket__meta-row"><dt>Fecha</dt><dd><time [attr.datetime]="currentSale.fechaHora">{{ date(currentSale.fechaHora) }}</time></dd></div>
+        <div class="ticket__meta-row"><dt>Hora</dt><dd>{{ time(currentSale.fechaHora) }}</dd></div>
+        <div class="ticket__meta-row"><dt>Atendió</dt><dd>{{ currentSale.usuario }}</dd></div>
+        <div class="ticket__meta-row"><dt>Método de pago</dt><dd>{{ currentSale.metodoPago }}</dd></div>
+        @if (currentSale.referencia) { <div class="ticket__meta-row"><dt>Referencia</dt><dd>{{ currentSale.referencia }}</dd></div> }
+      </dl>
+
+      <section class="ticket__products" aria-labelledby="ticket-products-title">
+        <h2 class="ticket__section-title" id="ticket-products-title">Tu pedido</h2>
+        <ul class="ticket__items">
+          @for (item of currentSale.items; track item.productId) {
+            <li class="ticket__item">
+              <span class="ticket__item-info"><strong>{{ item.nombre }}</strong><span class="ticket__quantity">{{ item.cantidad }} × {{ money(item.precio) }}</span></span>
+              <strong class="ticket__item-price">{{ money(item.precio * item.cantidad) }}</strong>
+            </li>
+          }
+        </ul>
+      </section>
+
+      <dl class="ticket__totals">
+        <div class="ticket__total-row"><dt>Subtotal</dt><dd>{{ money(currentSale.subtotal) }}</dd></div>
+        <div class="ticket__total-row"><dt>IVA 16%</dt><dd>{{ money(currentSale.iva) }}</dd></div>
+        <div class="ticket__total-row ticket__grand-total"><dt>Total <small class="ticket__currency">MXN</small></dt><dd>{{ money(currentSale.total) }}</dd></div>
+      </dl>
+
+      <footer class="ticket__footer">
+        <p class="ticket__thanks">Gracias por compartir tu día con Savia.</p>
+        <p class="ticket__closing">Te esperamos para tu próxima pausa.</p>
+        @if (currentSale.factura) {
+          <span class="ticket__invoice-status"><app-badge text="Venta facturada" variant="success" /></span>
+        } @else {
+          <p class="ticket__closing">Comprobante de venta · Sin factura</p>
+        }
+      </footer>
+    </article>
+    <p class="ticket__notice" role="status">{{ notice }}</p>
+    <nav class="ticket__actions" aria-label="Acciones del comprobante">
+      <button class="ticket__button" type="button" (click)="finish()">Finalizar</button>
+      @if (!currentSale.factura) {
+        <button class="ticket__button ticket__button--secondary" type="button" (click)="openInvoice()">Generar factura</button>
+      } @else {
+        <button class="ticket__button ticket__button--secondary" type="button" (click)="downloadXml()">Descargar XML nuevamente</button>
+      }
+    </nav>
+
+    @if (invoiceOpen && !currentSale.factura) {
+      <app-modal [open]="true" title="Generar factura" (close)="invoiceOpen = false">
+        <app-invoice-form class="component" [sale]="currentSale" (save)="generateInvoice($event)" (cancel)="invoiceOpen = false" />
+      </app-modal>
+    }
+  } @else {
+    <article class="ticket__empty">
+      <h1 class="ticket__section-title">No hay una venta disponible para mostrar.</h1>
+      <button class="ticket__button" type="button" (click)="finish()">Volver a ventas</button>
+    </article>
+  }
+</section>

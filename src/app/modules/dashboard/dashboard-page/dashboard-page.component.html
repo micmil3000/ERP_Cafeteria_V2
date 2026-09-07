@@ -1,0 +1,69 @@
+<section class="dashboard" aria-label="Resumen de inicio">
+  <header class="dashboard__welcome">
+    <span class="dashboard__welcome-icon" aria-hidden="true">
+      <svg class="dashboard__icon" viewBox="0 0 24 24">
+        <path d="M4 9h13v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4Z M17 10h2a3 3 0 0 1 0 6h-2 M8 3v2 M12 2v3 M3 22h15" />
+      </svg>
+    </span>
+    <app-page-header class="dashboard__welcome-heading"
+      title="¡Hola, Ana!"
+      [description]="welcomeDescription"
+    />
+  </header>
+
+  <section class="dashboard__stats" aria-label="Estadísticas principales">
+    @for (stat of visibleStats; track stat.label; let index = $index) {
+      <app-stat-card class="dashboard__stat" [label]="stat.label" [value]="stat.value" [detail]="stat.detail"
+        [class.dashboard__stat--cinnamon]="index === 1"
+        [class.dashboard__stat--terracotta]="index === 2">
+        <span stat-card-icon class="dashboard__stat-icon"
+          [class.dashboard__stat-icon--cinnamon]="index === 1"
+          [class.dashboard__stat-icon--terracotta]="index === 2" aria-hidden="true">
+          <svg class="dashboard__icon" viewBox="0 0 24 24">
+            <path [attr.d]="stat.icon" />
+          </svg>
+        </span>
+      </app-stat-card>
+    }
+  </section>
+
+  <section class="dashboard__quick-actions" aria-labelledby="dashboard-actions-title">
+    <header class="dashboard__section-header">
+      <h2 class="dashboard__section-title" id="dashboard-actions-title">Acciones rápidas</h2>
+    </header>
+    <ul class="dashboard__actions-list" [class.dashboard__actions-list--worker]="currentRole === 'TRABAJADOR'">
+      @for (action of visibleActions; track action.label; let index = $index) {
+        <li class="dashboard__action-item">
+          <button class="dashboard__action" type="button"
+            [routerLink]="action.label === 'Consultar inventario' ? '/inventario' : action.label === 'Registrar gasto' ? '/finanzas' : action.label === 'Nueva venta' ? '/ventas' : action.label === 'Nueva compra' ? '/compras' : action.label === 'Registrar trabajador' || action.label === 'Registrar salida' ? '/recursos-humanos' : null"
+            [title]="action.label"
+            [class.dashboard__action--terracotta]="index === 1"
+            [class.dashboard__action--cinnamon]="index === 2">
+            <svg class="dashboard__icon dashboard__action-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <path [attr.d]="action.icon" />
+            </svg>
+            <span class="dashboard__action-label">{{ action.label }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  </section>
+
+  @if (currentRole === 'GERENTE') {
+  <section class="dashboard__alerts" aria-labelledby="dashboard-alerts-title">
+    <header class="dashboard__section-header">
+      <h2 class="dashboard__section-title" id="dashboard-alerts-title">Alertas</h2>
+    </header>
+    <ul class="dashboard__alerts-list">
+      @for (alert of alerts; track alert.text; let index = $index) {
+        <li class="dashboard__alert" [class.dashboard__alert--terracotta]="index === 1">
+          <svg class="dashboard__icon dashboard__alert-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path [attr.d]="alert.icon" />
+          </svg>
+          <p class="dashboard__alert-text">{{ alert.text }}</p>
+        </li>
+      }
+    </ul>
+  </section>
+  }
+</section>

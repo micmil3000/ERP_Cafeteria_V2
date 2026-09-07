@@ -1,0 +1,12 @@
+<div class="tabs">
+  <div class="tabs__list" role="group" aria-label="Vistas de la sección">
+    @for (tab of tabs(); track tab.id) {
+      <button class="tabs__item" type="button"
+        [class.tabs__item--active]="activeTab() === tab.id"
+        [attr.aria-pressed]="activeTab() === tab.id"
+        (click)="tabChange.emit(tab.id)">
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+</div>

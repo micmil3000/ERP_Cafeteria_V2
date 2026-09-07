@@ -1,0 +1,101 @@
+.payment {
+	display: grid;
+	gap: 20px;
+}
+
+.payment__summary {
+	display: grid;
+	gap: 12px;
+	margin: 0;
+	padding: 18px;
+	border-radius: 12px;
+	background-color: var(--color-primary-light);
+}
+
+.payment__row {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.payment__row dd {
+	margin: 0;
+}
+
+.payment__row--total {
+	padding-top: 12px;
+	border-top: 1px solid var(--color-border);
+	font-size: 24px;
+	font-weight: 700;
+	color: var(--color-primary-dark);
+}
+
+.payment__field {
+	display: grid;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.payment__select {
+	width: 100%;
+	padding: 11px 12px;
+	border: 1px solid var(--color-border);
+	border-radius: 10px;
+	background-color: var(--color-surface);
+	color: var(--color-text-primary);
+	font: inherit;
+}
+
+.payment__select:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 2px;
+}
+
+.payment__simulation {
+	margin: 0;
+	padding: 14px;
+	border: 1px solid var(--color-border);
+	border-radius: 12px;
+	color: var(--color-text-secondary);
+}
+
+.payment__status {
+	margin: 0;
+	padding: 12px;
+	border-radius: 10px;
+	background-color: color-mix(in srgb, var(--color-secondary) 15%, var(--color-surface));
+	color: var(--color-text-primary);
+	font-size: 14px;
+}
+
+.payment__actions {
+	display: flex;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.payment__button {
+	padding: 10px 16px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background-color: var(--color-primary-dark);
+	color: var(--color-surface);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.payment__button:hover {
+	background-color: var(--color-primary-hover);
+}
+
+.payment__button--secondary {
+	border-color: var(--color-border);
+	background-color: var(--color-surface);
+	color: var(--color-text-secondary);
+}
+
+.payment__button--secondary:hover {
+	background-color: var(--color-surface-secondary);
+}

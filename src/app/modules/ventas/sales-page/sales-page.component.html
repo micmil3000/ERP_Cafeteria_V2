@@ -1,0 +1,77 @@
+<section class="sales" aria-label="Ventas y facturación">
+  <app-page-header title="Ventas" description="Registra nuevas ventas y consulta el historial de operaciones de Savia Café." />
+  <app-tabs [tabs]="tabs" [activeTab]="activeTab" (tabChange)="activeTab = $event" />
+
+  @if (activeTab === 'new') {
+    <section class="sales__content" aria-label="Nueva venta">
+      <section class="sales__catalog" aria-label="Catálogo de productos">
+        <div class="sales__toolbar">
+          <label class="sales__search-label" for="sales-search">Encuentra algo para disfrutar</label>
+          <input class="sales__search" id="sales-search" type="search" placeholder="Buscar por nombre…" [(ngModel)]="search" />
+        </div>
+        <div class="sales__categories" role="group" aria-label="Categorías de productos">
+          <button class="sales__category" [class.sales__category--active]="category === ''" type="button"
+            [attr.aria-pressed]="category === ''" (click)="category = ''">Todos</button>
+          @for (item of categories; track item) {
+            <button class="sales__category" [class.sales__category--active]="category === item" type="button"
+              [attr.aria-pressed]="category === item" (click)="category = item">{{ item }}</button>
+          }
+        </div>
+        <div class="sales__products">
+          @for (product of filteredProducts; track product.id) {
+            <app-product-card [product]="product" (add)="addProduct($event)" />
+          } @empty {
+            <p class="sales__empty">No hay productos que coincidan con tu búsqueda y categoría.</p>
+          }
+        </div>
+      </section>
+      <app-sale-summary class="sales__summary" 
+        [items]="cart" 
+        [subtotal]="subtotal" 
+        [iva]="iva" [total]="total" 
+        [message]="message"
+        (increase)="increase($event)" (decrease)="decrease($event)" (remove)="remove($event)"
+        (checkout)="checkout()" (cancel)="cancelOpen = true" />
+    </section>
+  } @else {
+    <section class="sales__history" aria-label="Historial de ventas">
+      <header class="sales__history-header"><h2 class="sales__heading">Ventas confirmadas</h2><p class="sales__history-context">{{ currentRole === 'GERENTE' ? 'Todas las ventas' : 'Ventas de ' + currentUser }} · {{ visibleSales.length }} registros</p></header>
+      <app-data-table label="Historial de ventas confirmadas" [empty]="visibleSales.length === 0" [columnCount]="9">
+        <thead class="data-table__head">
+          <tr>
+            @for (heading of ['Número', 'Fecha y hora', 'Responsable', 'Productos', 'Subtotal', 'IVA', 'Total', 'Estado factura', 'Acción']; track heading) {
+              <th class="data-table__header" scope="col">{{ heading }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody class="data-table__body">
+          @for (sale of visibleSales; track sale.id) {
+            <tr class="data-table__row">
+              <td class="data-table__cell">#{{ sale.id }}</td>
+              <td class="data-table__cell sales__nowrap">{{ date(sale.fechaHora) }}</td>
+              <td class="data-table__cell">{{ sale.usuario }}</td>
+              <td class="data-table__cell">{{ sale.items.length }}</td>
+              <td class="data-table__cell sales__amount">{{ money(sale.subtotal) }}</td>
+              <td class="data-table__cell sales__amount">{{ money(sale.iva) }}</td>
+              <td class="data-table__cell sales__amount">{{ money(sale.total) }}</td>
+              <td class="data-table__cell"><app-badge [text]="sale.factura ? 'Facturada' : 'Sin factura'" [variant]="sale.factura ? 'success' : 'neutral'" /></td>
+              <td class="data-table__cell"><button class="sales__detail-button" type="button" (click)="openDetail(sale)" [attr.aria-label]="'Ver detalle de venta ' + sale.id">Ver detalle</button></td>
+            </tr>
+          }
+        </tbody>
+      </app-data-table>
+    </section>
+  }
+</section>
+
+@if (cancelOpen && cart.length) {
+  <app-confirm-dialog [open]="true" title="Cancelar venta" message="¿Deseas cancelar la venta actual? Se vaciará el resumen sin afectar existencias."
+    confirmText="Cancelar venta" variant="danger" (confirm)="cancelSale()" (cancel)="cancelOpen = false" />
+}
+@if (paymentOpen) {
+  <app-payment-modal [subtotal]="subtotal" [iva]="iva" [total]="total" [error]="paymentError"
+    (confirm)="confirmPayment($event)" (close)="paymentOpen = false" />
+}
+@if (selectedSale; as sale) {
+  <app-sale-detail-modal [sale]="sale" (close)="selectedSale = null" />
+}

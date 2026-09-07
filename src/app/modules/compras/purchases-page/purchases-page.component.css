@@ -1,0 +1,320 @@
+.purchases {
+	display: grid;
+	gap: 22px;
+	min-width: 0;
+}
+
+.purchases__button {
+	padding: 10px 16px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background-color: var(--color-primary-dark);
+	color: var(--color-surface);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.purchases__button:hover:not(:disabled) {
+	background-color: var(--color-primary-hover);
+}
+
+.purchases__button:disabled {
+	background-color: var(--color-surface-secondary);
+	color: var(--color-text-secondary);
+	cursor: default;
+}
+
+.purchases__notice {
+	margin: 0;
+	padding: 12px 16px;
+	border-radius: 12px;
+	background-color: var(--color-primary-light);
+	color: var(--color-primary-dark);
+}
+
+.purchases__notice:empty, .purchases__error:empty {
+	display: none;
+}
+
+.purchases__toolbar {
+	display: flex;
+	align-items: flex-end;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 16px;
+	margin-bottom: 18px;
+	padding: 18px;
+	border-radius: 14px;
+	background-color: var(--color-primary-light);
+}
+
+.purchases__field {
+	display: grid;
+	gap: 8px;
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.purchases__control {
+	width: 100%;
+	min-width: 0;
+	padding: 10px 12px;
+	border: 1px solid var(--color-border);
+	border-radius: 10px;
+	background-color: var(--color-surface);
+	color: var(--color-text-primary);
+	font: inherit;
+}
+
+.purchases__search {
+	width: min(340px, 100%);
+}
+
+.purchases__control:focus-visible, .purchases__quantity-input:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 2px;
+}
+
+.purchases__muted {
+	margin: 6px 0;
+	color: var(--color-text-secondary);
+	font-size: 12px;
+	font-weight: 400;
+}
+
+.purchases__actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.purchases__text-button {
+	padding: 7px 10px;
+	border: 0;
+	border-radius: 8px;
+	background-color: var(--color-primary-light);
+	color: var(--color-primary-dark);
+	font-size: 12px;
+	font-weight: 600;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.purchases__text-button:hover {
+	background-color: var(--color-surface-secondary);
+}
+
+.purchases__text-button--danger {
+	background-color: color-mix(in srgb, var(--color-secondary) 18%, var(--color-surface));
+	color: var(--color-text-primary);
+}
+
+.purchases__views {
+	display: flex;
+	gap: 10px;
+}
+
+.purchases__view {
+	padding: 8px 14px;
+	border: 1px solid var(--color-border);
+	border-radius: 999px;
+	background-color: var(--color-surface);
+	color: var(--color-text-secondary);
+	font-size: 13px;
+	cursor: pointer;
+}
+
+.purchases__view--active {
+	background-color: var(--color-primary-dark);
+	color: var(--color-surface);
+	border-color: var(--color-primary-dark);
+}
+
+.purchases__purchase-builder {
+	display: grid;
+	grid-template-columns: minmax(0, 1.4fr) minmax(300px, 1fr);
+	align-items: start;
+	gap: 24px;
+}
+
+.purchases__selection, .purchases__cart {
+	padding: 24px;
+	border: 1px solid var(--color-border);
+	border-radius: 16px;
+	background-color: var(--color-surface);
+	min-width: 0;
+}
+
+.purchases__cart {
+	border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-border));
+	background-color: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface));
+}
+
+.purchases__step-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 12px 0 18px;
+}
+
+.purchases__step {
+	display: grid;
+	place-items: center;
+	flex-shrink: 0;
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background-color: var(--color-primary-light);
+	color: var(--color-primary-dark);
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.purchases__title {
+	margin: 0;
+	color: var(--color-primary-dark);
+	font-size: 18px;
+}
+
+.purchases__products, .purchases__lines {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.purchases__product {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 12px;
+	padding: 16px 0;
+	border-bottom: 1px solid var(--color-divider);
+	font-size: 14px;
+}
+
+.purchases__product-price {
+	display: grid;
+	gap: 4px;
+	color: var(--color-primary-dark);
+}
+
+.purchases__product-price small {
+	font-size: 11px;
+	color: var(--color-text-secondary);
+}
+
+.purchases__empty {
+	padding: 28px 16px;
+	color: var(--color-text-secondary);
+	text-align: center;
+	font-size: 14px;
+}
+
+.purchases__line {
+	padding: 16px 0;
+	border-bottom: 1px solid var(--color-divider);
+}
+
+.purchases__line-heading {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	font-size: 14px;
+}
+
+.purchases__quantity {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.purchases__quantity-button {
+	width: 30px;
+	height: 34px;
+	border: 0;
+	border-radius: 8px;
+	background-color: var(--color-primary-light);
+	color: var(--color-primary-dark);
+	cursor: pointer;
+}
+
+.purchases__quantity-button:disabled {
+	opacity: 0.5;
+	cursor: default;
+}
+
+.purchases__quantity-input {
+	width: 82px;
+	padding: 6px;
+	border: 1px solid var(--color-border);
+	border-radius: 8px;
+	background-color: var(--color-surface);
+	color: var(--color-text-primary);
+	font: inherit;
+}
+
+.purchases__remove {
+	padding: 6px;
+	border: 0;
+	background-color: transparent;
+	color: var(--color-text-secondary);
+	font-size: 12px;
+	cursor: pointer;
+}
+
+.purchases__totals {
+	display: grid;
+	gap: 12px;
+	margin: 22px 0;
+	font-size: 14px;
+}
+
+.purchases__total-row {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.purchases__total-row dd {
+	margin: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.purchases__total-row--grand {
+	padding-top: 12px;
+	border-top: 1px solid var(--color-border);
+	color: var(--color-primary-dark);
+	font-size: 24px;
+	font-weight: 700;
+}
+
+.purchases__confirm {
+	width: 100%;
+}
+
+.purchases__history {
+	display: grid;
+	gap: 18px;
+	min-width: 0;
+}
+
+.purchases__amount {
+	white-space: nowrap;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+.purchases__error {
+	display: block;
+	margin-top: 6px;
+	color: var(--color-text-primary);
+	font-size: 12px;
+}
+
+@media (max-width: 1000px) {
+	.purchases__purchase-builder {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

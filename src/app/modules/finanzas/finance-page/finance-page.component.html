@@ -1,0 +1,145 @@
+<section class="finance" aria-label="Contabilidad y Finanzas">
+  <app-page-header title="Finanzas" description="Consulta los ingresos, gastos y resultados financieros de Savia Café.">
+    <button class="finance__button" type="button" (click)="expenseOpen = true; notice = ''">Registrar gasto</button>
+  </app-page-header>
+
+  <section class="finance__summary" aria-label="Resumen financiero en MXN">
+    @for (stat of summary; track stat.label) {
+      <app-stat-card [class]="'finance__stat finance__tone--' + stat.tone"
+        [label]="stat.label" [value]="money(stat.value)" [detail]="stat.detail">
+        <span stat-card-icon class="finance__stat-icon" aria-hidden="true">
+          <svg class="finance__icon" viewBox="0 0 24 24"><path [attr.d]="stat.icon" /></svg>
+        </span>
+      </app-stat-card>
+    }
+  </section>
+
+  <form class="finance__filters" aria-label="Filtrar movimientos" (submit)="$event.preventDefault()">
+    <div class="finance__filter-group">
+      <label for="finance-from">Fecha desde</label>
+      <input class="finance__control" id="finance-from" name="desde" type="date" [(ngModel)]="filters.desde"
+        [attr.aria-invalid]="invalidDates" aria-describedby="finance-date-error" />
+    </div>
+    <div class="finance__filter-group">
+      <label for="finance-to">Fecha hasta</label>
+      <input class="finance__control" id="finance-to" name="hasta" type="date" [(ngModel)]="filters.hasta"
+        [attr.aria-invalid]="invalidDates" aria-describedby="finance-date-error" />
+    </div>
+    <div class="finance__filter-group">
+      <label for="finance-type">Tipo</label>
+      <select class="finance__control" id="finance-type" name="tipo" [(ngModel)]="filters.tipo">
+        <option value="">Todos</option><option value="INGRESO">Ingreso</option><option value="GASTO">Gasto</option>
+      </select>
+    </div>
+    <div class="finance__filter-group">
+      <label for="finance-category">Categoría</label>
+      <select class="finance__control" id="finance-category" name="categoria" [(ngModel)]="filters.categoria">
+        <option value="">Todas</option>
+        @for (category of categories; track category) { <option [value]="category">{{ category }}</option> }
+      </select>
+    </div>
+    <div class="finance__filter-group">
+      <label for="finance-origin">Origen</label>
+      <select class="finance__control" id="finance-origin" name="origen" [(ngModel)]="filters.origen">
+        <option value="">Todos</option>
+        @for (origin of origins; track origin) { <option [value]="origin">{{ origin }}</option> }
+      </select>
+    </div>
+    <button class="finance__button finance__button--secondary" type="button" (click)="clearFilters()">Limpiar filtros</button>
+    <p class="finance__filter-error" id="finance-date-error" aria-live="polite">@if (invalidDates) { La fecha desde no puede ser posterior a la fecha hasta. }</p>
+  </form>
+
+  <section class="finance__charts" aria-label="Gráficas financieras en MXN">
+    <article class="finance__chart">
+      <h2 class="finance__chart-title">Ingresos vs Gastos</h2>
+      <ul class="finance__comparison">
+        @for (bar of comparison; track bar.label) {
+          <li [class]="'finance__column finance__tone--' + bar.tone">
+            <span class="finance__chart-value">{{ money(bar.total) }}</span>
+            <div class="finance__column-track" aria-hidden="true">
+              <span class="finance__column-bar" [style.height.%]="bar.percentage"></span>
+            </div>
+            <span>{{ bar.label }}</span>
+          </li>
+        }
+      </ul>
+    </article>
+    <article class="finance__chart">
+      <h2 class="finance__chart-title">Gastos por categoría</h2>
+      <ul class="finance__category-list">
+        @for (category of categoryExpenses; track category.label) {
+          <li [class]="'finance__category finance__tone--' + category.tone">
+            <p class="finance__category-label"><span>{{ category.label }}</span><strong>{{ money(category.total) }}</strong></p>
+            <div class="finance__bar-track" aria-hidden="true"><span class="finance__bar" [style.width.%]="category.percentage"></span></div>
+          </li>
+        } @empty {
+          <li class="finance__empty">No hay gastos para los filtros seleccionados.</li>
+        }
+      </ul>
+    </article>
+  </section>
+
+  <section class="finance__movement-history" aria-labelledby="finance-history-title">
+    <header class="finance__history-header">
+      <h2 class="finance__chart-title" id="finance-history-title">Historial de movimientos</h2>
+      <span class="finance__history-count">{{ filteredMovements.length }} movimientos · MXN</span>
+    </header>
+    <p class="finance__notice" role="status">{{ notice }}</p>
+    <app-data-table label="Historial de movimientos financieros" [empty]="filteredMovements.length === 0"
+      emptyMessage="No hay movimientos que coincidan con los filtros." [columnCount]="9">
+      <thead class="data-table__head">
+        <tr class="data-table__row">
+          @for (heading of ['Fecha', 'Concepto', 'Categoría', 'Tipo', 'Origen', 'Subtotal', 'IVA', 'Total', 'Acción']; track heading) {
+            <th class="data-table__header" scope="col">{{ heading }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody class="data-table__body">
+        @for (movement of filteredMovements; track movement.id) {
+          <tr class="data-table__row">
+            <td class="data-table__cell finance__nowrap">{{ date(movement.fecha) }}</td>
+            <td class="data-table__cell">{{ movement.concepto }}</td>
+            <td class="data-table__cell">{{ movement.categoria }}</td>
+            <td class="data-table__cell"><app-badge [text]="movement.tipo" [variant]="movement.tipo === 'INGRESO' ? 'success' : 'warning'" /></td>
+            <td class="data-table__cell">{{ movement.origen }}</td>
+            <td class="data-table__cell finance__amount">{{ money(movement.subtotal) }}</td>
+            <td class="data-table__cell finance__amount">{{ money(movement.iva) }}</td>
+            <td class="data-table__cell finance__amount">{{ money(movement.total) }}</td>
+            <td class="data-table__cell">
+              <button class="finance__movement-action" type="button" (click)="selectedMovement = movement"
+                [attr.aria-label]="'Ver detalle de ' + movement.concepto">Ver detalle</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </app-data-table>
+  </section>
+</section>
+
+@if (expenseOpen) {
+  <app-modal [open]="true" title="Registrar gasto" (close)="expenseOpen = false">
+    <app-expense-form (save)="saveExpense($event)" (cancel)="expenseOpen = false" />
+  </app-modal>
+}
+
+@if (selectedMovement; as movement) {
+  <app-modal [open]="true" title="Detalle de movimiento" (close)="selectedMovement = null">
+    <section class="finance__detail" aria-label="Movimiento de solo lectura">
+      <dl class="finance__detail-list">
+        <div class="finance__detail-row"><dt>Fecha</dt><dd>{{ date(movement.fecha) }}</dd></div>
+        <div class="finance__detail-row"><dt>Tipo</dt><dd><app-badge [text]="movement.tipo" [variant]="movement.tipo === 'INGRESO' ? 'success' : 'warning'" /></dd></div>
+        <div class="finance__detail-row"><dt>Concepto</dt><dd>{{ movement.concepto }}</dd></div>
+        <div class="finance__detail-row"><dt>Categoría</dt><dd>{{ movement.categoria }}</dd></div>
+        <div class="finance__detail-row"><dt>Origen</dt><dd>{{ movement.origen }}</dd></div>
+        <div class="finance__detail-row"><dt>Subtotal</dt><dd>{{ money(movement.subtotal) }}</dd></div>
+        <div class="finance__detail-row"><dt>IVA</dt><dd>{{ money(movement.iva) }}</dd></div>
+        <div class="finance__detail-row"><dt>Total</dt><dd><strong>{{ money(movement.total) }}</strong></dd></div>
+        @if (movement.referencia) { <div class="finance__detail-row"><dt>Referencia</dt><dd>{{ movement.referencia }}</dd></div> }
+        <div class="finance__detail-row"><dt>Usuario</dt><dd>{{ movement.usuario }}</dd></div>
+        @if (movement.metodoPago) { <div class="finance__detail-row"><dt>Método de pago</dt><dd>{{ movement.metodoPago }}</dd></div> }
+        @if (movement.observaciones) { <div class="finance__detail-row"><dt>Observaciones</dt><dd>{{ movement.observaciones }}</dd></div> }
+      </dl>
+    </section>
+    <button modal-footer class="finance__button finance__button--secondary" type="button" (click)="selectedMovement = null">Cerrar</button>
+  </app-modal>
+}

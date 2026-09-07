@@ -1,0 +1,16 @@
+<form class="login-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <div class="login-form__field">
+    <label for="login-email">Correo electrónico</label>
+    <input class="login-form__input" id="login-email" type="email" formControlName="correo" autocomplete="username" required
+      [attr.aria-invalid]="invalid('correo')" aria-describedby="login-email-error" />
+    <span class="login-form__error" id="login-email-error">@if (invalid('correo')) { Ingresa un correo válido. }</span>
+  </div>
+  <div class="login-form__field">
+    <label for="login-password">Contraseña</label>
+    <input class="login-form__input" id="login-password" type="password" formControlName="password" autocomplete="current-password" required
+      [attr.aria-invalid]="invalid('password')" aria-describedby="login-password-error" />
+    <span class="login-form__error" id="login-password-error">@if (invalid('password')) { Ingresa tu contraseña. }</span>
+  </div>
+  <p class="login-form__error" role="alert">{{ error() }}</p>
+  <button class="login-form__button" type="submit">Iniciar sesión</button>
+</form>

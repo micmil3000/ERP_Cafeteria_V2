@@ -1,0 +1,76 @@
+<section class="inventory" aria-label="Inventario de productos">
+  <app-page-header title="Inventario" description="Consulta y administra los productos disponibles en Savia Café.">
+    @if (currentRole === 'GERENTE') {
+      <button class="inventory__button" type="button" (click)="openCreate()">Registrar producto</button>
+    }
+  </app-page-header>
+
+  <dl class="inventory__summary" aria-label="Resumen de productos activos">
+    @for (item of summary; track item.label) {
+      <div [class]="'inventory__summary-item inventory__summary-item--' + item.tone">
+        <dt class="inventory__summary-label">{{ item.label }}</dt>
+        <dd class="inventory__summary-value">{{ item.value }}</dd>
+      </div>
+    }
+  </dl>
+
+  <form class="inventory__filters" aria-label="Buscar, filtrar y ordenar productos" (submit)="$event.preventDefault()">
+    <div class="inventory__filter-group inventory__search">
+      <label for="inventory-search">Buscar producto</label>
+      <input class="inventory__control" id="inventory-search" name="search" type="search" placeholder="Nombre del producto" [(ngModel)]="filters.search" />
+    </div>
+    <div class="inventory__filter-group">
+      <label for="inventory-category">Categoría</label>
+      <select class="inventory__control" id="inventory-category" name="category" [(ngModel)]="filters.category">
+        <option value="">Todas</option>
+        @for (category of categories; track category) { <option [value]="category">{{ category }}</option> }
+      </select>
+    </div>
+    <div class="inventory__filter-group">
+      <label for="inventory-stock">Estado de stock</label>
+      <select class="inventory__control" id="inventory-stock" name="stock" [(ngModel)]="filters.stock">
+        <option value="">Todos</option>
+        <option value="DISPONIBLE">Disponible</option>
+        <option value="STOCK BAJO">Stock bajo</option>
+        <option value="AGOTADO">Agotado</option>
+      </select>
+    </div>
+    <div class="inventory__filter-group">
+      <label for="inventory-status">Estado del producto</label>
+      <select class="inventory__control" id="inventory-status" name="status" [(ngModel)]="filters.status">
+        <option value="">Todos</option><option value="ACTIVO">Activo</option><option value="INACTIVO">Inactivo</option>
+      </select>
+    </div>
+    <div class="inventory__filter-group">
+      <label for="inventory-order">Orden</label>
+      <select class="inventory__control" id="inventory-order" name="order" [(ngModel)]="filters.order">
+        <option value="AZ">A-Z</option><option value="ZA">Z-A</option>
+      </select>
+    </div>
+    <button class="inventory__button inventory__button--secondary" type="button" (click)="clearFilters()">Limpiar filtros</button>
+  </form>
+
+  <section class="inventory__table-section" aria-labelledby="inventory-products-title">
+    <header class="inventory__table-header">
+      <h2 class="inventory__title" id="inventory-products-title">Catálogo de productos</h2>
+      <span class="inventory__count">{{ filteredProducts.length }} resultados</span>
+    </header>
+    <p class="inventory__notice" role="status">{{ notice }}</p>
+    <app-product-table [products]="filteredProducts" [role]="currentRole"
+      (newVersion)="openVersion($event)" (deactivate)="requestDeactivation($event)" />
+  </section>
+</section>
+
+@if (currentRole === 'GERENTE') {
+  @if (formOpen) {
+    <app-modal [open]="true" [title]="versionSource ? 'Nueva versión de producto' : 'Registrar producto'" (close)="closeForm()">
+      <app-product-form [mode]="versionSource ? 'NEW_VERSION' : 'CREATE'" [product]="versionSource"
+        (save)="saveProduct($event)" (cancel)="closeForm()" />
+    </app-modal>
+  }
+  @if (pendingDeactivation; as product) {
+    <app-confirm-dialog [open]="true" title="Desactivar producto" confirmText="Desactivar" variant="danger"
+      [message]="'¿Deseas desactivar «' + product.nombre + '»? Dejará de estar disponible para nuevas operaciones. El registro se conservará para consulta.'"
+      (confirm)="deactivate()" (cancel)="pendingDeactivation = null" />
+  }
+}

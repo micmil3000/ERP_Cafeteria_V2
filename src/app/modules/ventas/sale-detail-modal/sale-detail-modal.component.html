@@ -1,0 +1,36 @@
+<app-modal [open]="true" [title]="'Venta #' + sale().id" (close)="close.emit()">
+  <section class="sale-detail" aria-label="Detalle de venta confirmada">
+    <dl class="sale-detail__meta">
+      <div class="sale-detail__row"><dt>Fecha y hora</dt><dd>{{ date(sale().fechaHora) }}</dd></div>
+      <div class="sale-detail__row"><dt>Responsable</dt><dd>{{ sale().usuario }}</dd></div>
+      <div class="sale-detail__row"><dt>Método de pago</dt><dd>{{ sale().metodoPago }}</dd></div>
+      @if (sale().referencia) { <div class="sale-detail__row"><dt>Referencia</dt><dd>{{ sale().referencia }}</dd></div> }
+    </dl>
+    <h3 class="sale-detail__title">Productos</h3>
+    <ul class="sale-detail__items">
+      @for (item of sale().items; track item.productId) {
+        <li class="sale-detail__item"><span><strong>{{ item.nombre }}</strong><small class="sale-detail__unit">{{ item.cantidad }} × {{ money(item.precio) }}</small></span><strong>{{ money(item.precio * item.cantidad) }}</strong></li>
+      }
+    </ul>
+    <dl class="sale-detail__totals">
+      <div class="sale-detail__row"><dt>Subtotal</dt><dd>{{ money(sale().subtotal) }}</dd></div>
+      <div class="sale-detail__row"><dt>IVA 16%</dt><dd>{{ money(sale().iva) }}</dd></div>
+      <div class="sale-detail__row sale-detail__row--total"><dt>Total</dt><dd>{{ money(sale().total) }}</dd></div>
+    </dl>
+    <section class="sale-detail__invoice" aria-label="Estado de factura">
+      <app-badge [text]="sale().factura ? 'Facturada' : 'Sin factura'" [variant]="sale().factura ? 'success' : 'neutral'" />
+      @if (sale().factura; as invoice) {
+        <dl class="sale-detail__meta">
+          <div class="sale-detail__row"><dt>RFC</dt><dd>{{ invoice.rfc }}</dd></div>
+          <div class="sale-detail__row"><dt>Nombre / Razón social</dt><dd>{{ invoice.nombre }}</dd></div>
+          <div class="sale-detail__row"><dt>Código postal</dt><dd>{{ invoice.codigoPostal }}</dd></div>
+          <div class="sale-detail__row"><dt>Régimen fiscal</dt><dd>{{ invoice.regimen }}</dd></div>
+          <div class="sale-detail__row"><dt>Uso de factura</dt><dd>{{ invoice.uso }}</dd></div>
+        </dl>
+      }
+    </section>
+  </section>
+  <footer modal-footer class="sale-detail__actions">
+    <button class="sale-detail__button sale-detail__button--secondary" type="button" (click)="close.emit()">Cerrar</button>
+  </footer>
+</app-modal>

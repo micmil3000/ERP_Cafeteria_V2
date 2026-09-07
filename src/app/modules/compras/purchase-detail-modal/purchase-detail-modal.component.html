@@ -1,0 +1,24 @@
+<app-modal [open]="true" [title]="'Compra #' + purchase().id" (close)="close.emit()">
+  <section class="purchase-detail" aria-label="Compra confirmada de solo lectura">
+    <dl class="purchase-detail__meta">
+      <div class="purchase-detail__row"><dt>Fecha y hora</dt><dd>{{ date(purchase().fechaHora) }}</dd></div>
+      <div class="purchase-detail__row"><dt>Proveedor</dt><dd>{{ purchase().proveedorNombre }}</dd></div>
+      <div class="purchase-detail__row"><dt>Responsable</dt><dd>{{ purchase().usuarioResponsable }}</dd></div>
+    </dl>
+    <h3 class="purchase-detail__title">Productos adquiridos</h3>
+    <ul class="purchase-detail__products">
+      @for (line of purchase().detalles; track line.productoId) {
+        <li class="purchase-detail__product">
+          <span><strong>{{ line.nombre }}</strong><small class="purchase-detail__price">{{ line.cantidad }} × {{ money(line.precioCompra) }}</small></span>
+          <strong>{{ money(line.cantidad * line.precioCompra) }}</strong>
+        </li>
+      }
+    </ul>
+    <dl class="purchase-detail__totals">
+      <div class="purchase-detail__row"><dt>Subtotal</dt><dd>{{ money(purchase().subtotal) }}</dd></div>
+      <div class="purchase-detail__row"><dt>IVA 16%</dt><dd>{{ money(purchase().iva) }}</dd></div>
+      <div class="purchase-detail__row purchase-detail__row--total"><dt>Total</dt><dd>{{ money(purchase().total) }}</dd></div>
+    </dl>
+  </section>
+  <button modal-footer class="purchase-detail__button" type="button" (click)="close.emit()">Cerrar</button>
+</app-modal>

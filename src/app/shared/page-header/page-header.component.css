@@ -1,0 +1,42 @@
+:host {
+	display: block;
+}
+
+.page-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 24px;
+	margin-bottom: 24px;
+}
+
+.page-header__content {
+	min-width: 0;
+}
+
+.page-header__title {
+	margin: 0;
+	color: var(--color-text-primary);
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.25;
+	overflow-wrap: anywhere;
+}
+
+.page-header__description {
+	margin: 8px 0 0;
+	color: var(--color-text-secondary);
+	font-size: 14px;
+}
+
+.page-header__actions {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.page-header__actions:empty {
+	display: none;
+}

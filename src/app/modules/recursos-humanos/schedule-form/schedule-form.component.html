@@ -1,0 +1,21 @@
+<form class="schedule-form" #form="ngForm" (ngSubmit)="submit(form)" novalidate>
+  @for (day of days; track day.dia) {
+    <fieldset class="schedule-form__day">
+      <legend class="schedule-form__label">{{ names[day.dia] }}</legend>
+      <label class="schedule-form__rest"><input type="checkbox" [(ngModel)]="day.descanso" [name]="'rest-' + day.dia" /> Descanso</label>
+      <div class="schedule-form__times">
+        <label class="schedule-form__field">Entrada
+          <input class="schedule-form__input" type="time" [(ngModel)]="day.entrada" [name]="'start-' + day.dia" [disabled]="day.descanso" [required]="!day.descanso" [attr.aria-describedby]="'schedule-error-' + day.dia" />
+        </label>
+        <label class="schedule-form__field">Salida
+          <input class="schedule-form__input" type="time" [(ngModel)]="day.salida" [name]="'end-' + day.dia" [disabled]="day.descanso" [required]="!day.descanso" [attr.aria-describedby]="'schedule-error-' + day.dia" />
+        </label>
+      </div>
+      <span class="schedule-form__error" [id]="'schedule-error-' + day.dia">@if (submitted && invalid(day)) { Indica entrada y salida; la salida debe ser posterior a la entrada. }</span>
+    </fieldset>
+  }
+  <footer class="schedule-form__actions">
+    <button class="schedule-form__button schedule-form__button--secondary" type="button" (click)="cancel.emit()">Cancelar</button>
+    <button class="schedule-form__button" type="submit">Guardar horario</button>
+  </footer>
+</form>

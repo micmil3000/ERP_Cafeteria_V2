@@ -1,0 +1,102 @@
+.expense-form {
+	display: grid;
+	gap: 14px;
+}
+
+.expense-form__field {
+	display: grid;
+	gap: 6px;
+}
+
+.expense-form__label {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--color-text-primary);
+}
+
+.expense-form__input, .expense-form__select, .expense-form__textarea {
+	width: 100%;
+	min-width: 0;
+	padding: 10px 12px;
+	border: 1px solid var(--color-border);
+	border-radius: 10px;
+	background-color: var(--color-surface);
+	color: var(--color-text-primary);
+	font: inherit;
+}
+
+.expense-form__textarea {
+	resize: vertical;
+}
+
+.expense-form__input:focus-visible, .expense-form__select:focus-visible, .expense-form__textarea:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 2px;
+}
+
+.expense-form__error {
+	color: color-mix(in srgb, var(--color-secondary) 45%, var(--color-text-primary));
+	font-size: 12px;
+}
+
+.expense-form__error:empty {
+	display: none;
+}
+
+.expense-form__summary {
+	display: grid;
+	gap: 10px;
+	margin: 4px 0;
+	padding: 16px;
+	border-radius: 12px;
+	background-color: var(--color-primary-light);
+	color: var(--color-primary-dark);
+}
+
+.expense-form__summary-row {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.expense-form__summary-row dd {
+	margin: 0;
+	font-variant-numeric: tabular-nums;
+}
+
+.expense-form__summary-row--total {
+	padding-top: 10px;
+	border-top: 1px solid var(--color-border);
+	font-weight: 700;
+}
+
+.expense-form__actions {
+	display: flex;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 12px;
+}
+
+.expense-form__button {
+	padding: 10px 16px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background-color: var(--color-primary-dark);
+	color: var(--color-surface);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.expense-form__button:hover {
+	background-color: var(--color-primary-hover);
+}
+
+.expense-form__button--cancel {
+	border-color: var(--color-border);
+	background-color: var(--color-surface);
+	color: var(--color-text-secondary);
+}
+
+.expense-form__button--cancel:hover {
+	background-color: var(--color-surface-secondary);
+}

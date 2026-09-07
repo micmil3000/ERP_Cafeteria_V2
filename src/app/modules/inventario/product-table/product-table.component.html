@@ -1,0 +1,59 @@
+<div class="product-table" role="region" aria-label="Catálogo de productos" tabindex="0">
+  <table class="product-table__table">
+    <caption class="product-table__caption">La disponibilidad indica existencias. Los productos inactivos no están disponibles para nuevas operaciones.</caption>
+    <thead class="product-table__head">
+      <tr>
+        @for (heading of ['Producto', 'Categoría', 'Precio', 'Stock', 'Stock mínimo', 'Disponibilidad', 'Estado']; track heading) {
+          <th class="product-table__header" scope="col">{{ heading }}</th>
+        }
+        @if (role() === 'GERENTE') { <th class="product-table__header" scope="col">Acciones</th> }
+      </tr>
+    </thead>
+    <tbody>
+      @for (product of products(); track product.id) {
+        <tr class="product-table__row" [class.product-table__row--inactive]="product.estado === 'INACTIVO'">
+          <td class="product-table__cell">
+            <div class="product-table__product">
+              @if (product.imagen && !failedImages.has(product.imagen)) {
+                <img class="product-table__image" [src]="product.imagen" alt="" width="44" height="44" loading="lazy"
+                  (error)="failedImages.add(product.imagen)" />
+              } @else {
+                <span class="product-table__placeholder" aria-hidden="true">
+                  <svg class="product-table__icon" viewBox="0 0 24 24">
+                    <path d="M4 9h13v7a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4Z M17 10h2a3 3 0 0 1 0 6h-2 M8 3v2 M12 2v3" />
+                  </svg>
+                </span>
+              }
+              <div class="product-table__details">
+                <span class="product-table__name">{{ product.nombre }}</span>
+                @if (product.descripcion) { <p class="product-table__description" [title]="product.descripcion">{{ product.descripcion }}</p> }
+              </div>
+            </div>
+          </td>
+          <td class="product-table__cell">{{ product.categoria }}</td>
+          <td class="product-table__cell product-table__amount">{{ money(product.precioVenta) }}</td>
+          <td class="product-table__cell product-table__amount">{{ product.stockActual }}</td>
+          <td class="product-table__cell product-table__amount">{{ product.stockMinimo }}</td>
+          <td class="product-table__cell">
+            <app-badge [text]="availability(product).label" [variant]="availability(product).variant" />
+          </td>
+          <td class="product-table__cell"><app-badge [text]="product.estado" [variant]="product.estado === 'ACTIVO' ? 'success' : 'neutral'" /></td>
+          @if (role() === 'GERENTE') {
+            <td class="product-table__cell">
+              <div class="product-table__actions">
+                <button class="product-table__button" type="button" (click)="newVersion.emit(product)"
+                  [attr.aria-label]="'Nueva versión de ' + product.nombre">Nueva versión</button>
+                @if (product.estado === 'ACTIVO') {
+                  <button class="product-table__button product-table__button--danger" type="button" (click)="deactivate.emit(product)"
+                    [attr.aria-label]="'Desactivar ' + product.nombre">Desactivar</button>
+                }
+              </div>
+            </td>
+          }
+        </tr>
+      } @empty {
+        <tr><td class="product-table__empty" [attr.colspan]="role() === 'GERENTE' ? 8 : 7">No hay productos que coincidan con los filtros.</td></tr>
+      }
+    </tbody>
+  </table>
+</div>

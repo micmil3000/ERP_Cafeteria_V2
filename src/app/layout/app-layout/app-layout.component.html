@@ -1,0 +1,34 @@
+<div
+	class="app-layout"
+	[class.app-layout--sidebar-closed]="!sidebarOpen"
+>
+	<app-sidebar
+		class="app-layout__sidebar"
+		[class.app-layout__sidebar--hidden]="!sidebarOpen"
+		(closeSidebar)="closeSidebar()"
+	/>
+
+	<section class="app-layout__content">
+		<header class="app-layout__header">
+			@if (!sidebarOpen) {
+				<button
+					class="app-layout__open-sidebar"
+					type="button"
+					aria-label="Abrir menú lateral"
+					title="Abrir menú"
+					(click)="openSidebar()"
+				>
+					<svg viewBox="0 0 24 24" aria-hidden="true">
+						<path d="M4 6h16 M4 12h16 M4 18h16" />
+					</svg>
+				</button>
+			}
+
+			<app-app-header />
+		</header>
+
+		<main class="app-layout__main">
+			<router-outlet />
+		</main>
+	</section>
+</div>

@@ -1,0 +1,73 @@
+.provider-form {
+	display: grid;
+	gap: 14px;
+}
+
+.provider-form__field {
+	display: grid;
+	gap: 6px;
+}
+
+.provider-form__label {
+	color: var(--color-text-primary);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.provider-form__input {
+	width: 100%;
+	min-width: 0;
+	padding: 10px 12px;
+	border: 1px solid var(--color-border);
+	border-radius: 10px;
+	background-color: var(--color-surface);
+	color: var(--color-text-primary);
+	font: inherit;
+	resize: vertical;
+}
+
+.provider-form__input:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 2px;
+}
+
+.provider-form__error {
+	color: color-mix(in srgb, var(--color-secondary) 45%, var(--color-text-primary));
+	font-size: 12px;
+}
+
+.provider-form__error:empty {
+	display: none;
+}
+
+.provider-form__actions {
+	display: flex;
+	justify-content: flex-end;
+	flex-wrap: wrap;
+	gap: 12px;
+	padding-top: 8px;
+}
+
+.provider-form__button {
+	padding: 10px 16px;
+	border: 1px solid transparent;
+	border-radius: 10px;
+	background-color: var(--color-primary-dark);
+	color: var(--color-surface);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.provider-form__button:hover {
+	background-color: var(--color-primary-hover);
+}
+
+.provider-form__button--secondary {
+	border-color: var(--color-border);
+	background-color: var(--color-surface);
+	color: var(--color-text-secondary);
+}
+
+.provider-form__button--secondary:hover {
+	background-color: var(--color-surface-secondary);
+}

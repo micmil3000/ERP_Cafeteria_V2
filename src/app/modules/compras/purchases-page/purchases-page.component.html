@@ -1,0 +1,160 @@
+@if (currentRole === 'GERENTE') {
+  <section class="purchases" aria-label="Compras y Proveedores">
+    <app-page-header title="Compras y Proveedores" description="Administra proveedores y registra las compras necesarias para abastecer Savia Café.">
+      @if (activeTab === 'providers') {
+        <button class="purchases__button" type="button" (click)="openProvider()">Registrar proveedor</button>
+      } 
+    </app-page-header>
+    <app-tabs [tabs]="tabs" [activeTab]="activeTab" (tabChange)="activeTab = $event" />
+    <p class="purchases__notice" role="status">{{ notice }}</p>
+
+    @if (activeTab === 'providers') {
+      <section class="purchases__section" aria-label="Proveedores">
+        <div class="purchases__toolbar">
+          <label class="purchases__field" for="provider-search">Buscar proveedor o contacto
+            <input class="purchases__control purchases__search" id="provider-search" type="search" [(ngModel)]="search" placeholder="Nombre o contacto…" />
+          </label>
+          <span class="purchases__muted">{{ filteredProviders.length }} proveedores</span>
+        </div>
+        <app-data-table label="Proveedores de Savia Café" [empty]="filteredProviders.length === 0" [columnCount]="7">
+          <thead class="data-table__head">
+            <tr>
+              @for (heading of ['Proveedor', 'Contacto', 'Teléfono', 'Correo', 'Estado', 'Productos', 'Acciones']; track heading) {
+                <th class="data-table__header" scope="col">{{ heading }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody class="data-table__body">
+            @for (provider of filteredProviders; track provider.id) {
+              <tr class="data-table__row">
+                <td class="data-table__cell"><strong>{{ provider.nombre }}</strong></td>
+                <td class="data-table__cell">{{ provider.contacto }}</td>
+                <td class="data-table__cell">{{ provider.telefono }}</td>
+                <td class="data-table__cell">{{ provider.correo }}</td>
+                <td class="data-table__cell"><app-badge [text]="provider.estado" [variant]="provider.estado === 'ACTIVO' ? 'success' : 'neutral'" /></td>
+                <td class="data-table__cell">
+                  <button class="purchases__text-button" type="button" (click)="drawerProviderId = provider.id"
+                    [attr.aria-label]="'Ver productos de ' + provider.nombre">Ver productos ({{ associationCount(provider.id) }})</button>
+                </td>
+                <td class="data-table__cell">
+                  <div class="purchases__actions">
+                    <button class="purchases__text-button" type="button" (click)="openProvider(provider)" [attr.aria-label]="'Editar ' + provider.nombre">Editar</button>
+                    @if (provider.estado === 'ACTIVO') {
+                      <button class="purchases__text-button purchases__text-button--danger" type="button" (click)="pendingDeactivation = provider" [attr.aria-label]="'Desactivar ' + provider.nombre">Desactivar</button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </app-data-table>
+      </section>
+    } @else {
+      <div class="purchases__views" role="group" aria-label="Vistas de compras">
+        <button class="purchases__view" [class.purchases__view--active]="purchaseView === 'new'" type="button" [attr.aria-pressed]="purchaseView === 'new'" (click)="purchaseView = 'new'">Nueva compra</button>
+        <button class="purchases__view" [class.purchases__view--active]="purchaseView === 'history'" type="button" [attr.aria-pressed]="purchaseView === 'history'" (click)="purchaseView = 'history'">Historial</button>
+      </div>
+      @if (purchaseView === 'new') {
+        <section class="purchases__purchase-builder" aria-label="Preparar compra">
+          <section class="purchases__selection" aria-label="Proveedor y productos">
+            <header class="purchases__step-header"><span class="purchases__step" aria-hidden="true">1</span><h2 class="purchases__title">Selecciona proveedor</h2></header>
+            <label class="purchases__field" for="purchase-provider">Proveedor activo
+              <select class="purchases__control" id="purchase-provider" [ngModel]="selectedProviderId" (ngModelChange)="changeProvider($event)">
+                <option [ngValue]="null">Selecciona un proveedor</option>
+                @for (provider of activeProviders; track provider.id) { <option [ngValue]="provider.id">{{ provider.nombre }}</option> }
+              </select>
+            </label>
+            <p class="purchases__muted">Al cambiar proveedor se limpia la compra en preparación.</p>
+            <header class="purchases__step-header"><span class="purchases__step" aria-hidden="true">2</span><h2 class="purchases__title">Elige los productos</h2></header>
+            <ul class="purchases__products">
+              @for (product of availableProducts; track product.id) {
+                <li class="purchases__product">
+                  <div><strong>{{ product.nombre }}</strong><p class="purchases__muted">{{ product.categoria }} · Stock local: {{ product.stockActual }}</p></div>
+                  <div class="purchases__product-price"><strong>{{ money(product.precioCompra) }}</strong><small>+ IVA</small></div>
+                  <button class="purchases__text-button" type="button" (click)="addProduct(product.id)" [attr.aria-label]="'Agregar ' + product.nombre">Agregar</button>
+                </li>
+              } @empty {
+                <li class="purchases__empty">{{ selectedProviderId ? 'Este proveedor no tiene productos asociados. Puedes asociarlos desde Proveedores.' : 'Selecciona un proveedor activo para consultar su catálogo.' }}</li>
+              }
+            </ul>
+          </section>
+          <aside class="purchases__cart" aria-label="Resumen de compra">
+            <header class="purchases__step-header"><span class="purchases__step" aria-hidden="true">3</span><h2 class="purchases__title">Revisa tu compra</h2></header>
+            <ul class="purchases__lines">
+              @for (line of lines; track line.productoId) {
+                <li class="purchases__line">
+                  <div class="purchases__line-heading"><strong>{{ line.nombre }}</strong><span>{{ money(line.precioCompra * line.cantidad) }}</span></div>
+                  <p class="purchases__muted">{{ money(line.precioCompra) }} por unidad</p>
+                  <div class="purchases__quantity">
+                    <button class="purchases__quantity-button" type="button" [disabled]="line.cantidad <= 1" (click)="setQuantity(line.productoId, line.cantidad - 1)" [attr.aria-label]="'Disminuir ' + line.nombre">−</button>
+                    <input class="purchases__quantity-input" type="number" min="1" max="1000000" step="1" [ngModel]="line.cantidad"
+                      (ngModelChange)="setQuantity(line.productoId, $event)" [attr.aria-label]="'Cantidad de ' + line.nombre"
+                      [attr.aria-describedby]="'quantity-error-' + line.productoId" />
+                    <button class="purchases__quantity-button" type="button" [disabled]="line.cantidad >= 1000000" (click)="setQuantity(line.productoId, line.cantidad + 1)" [attr.aria-label]="'Aumentar ' + line.nombre">+</button>
+                    <button class="purchases__remove" type="button" (click)="removeLine(line.productoId)" [attr.aria-label]="'Eliminar ' + line.nombre">Eliminar</button>
+                  </div>
+                  <span class="purchases__error" [id]="'quantity-error-' + line.productoId">@if (line.cantidad < 1 || line.cantidad > 1000000 || line.cantidad % 1 !== 0) { Usa una cantidad entera entre 1 y 1000000. }</span>
+                </li>
+              } @empty { <li class="purchases__empty">Agrega productos para comenzar tu compra.</li> }
+            </ul>
+            <dl class="purchases__totals">
+              <div class="purchases__total-row"><dt>Subtotal</dt><dd>{{ money(subtotal) }}</dd></div>
+              <div class="purchases__total-row"><dt>IVA 16%</dt><dd>{{ money(iva) }}</dd></div>
+              <div class="purchases__total-row purchases__total-row--grand"><dt>Total</dt><dd>{{ money(total) }}</dd></div>
+            </dl>
+            <button class="purchases__button purchases__confirm" type="button" [disabled]="!canConfirm" (click)="requestConfirmation()">Confirmar compra</button>
+          </aside>
+        </section>
+      } @else {
+        <section class="purchases__history" aria-label="Historial de compras">
+          <h2 class="purchases__title">Compras confirmadas</h2>
+          <app-data-table label="Historial de compras confirmadas" [empty]="purchases.length === 0" [columnCount]="9">
+            <thead class="data-table__head">
+              <tr>
+                @for (heading of ['Número', 'Fecha', 'Proveedor', 'Productos', 'Subtotal', 'IVA', 'Total', 'Responsable', 'Acción']; track heading) {
+                  <th class="data-table__header" scope="col">{{ heading }}</th>
+                }
+              </tr>
+            </thead>
+            <tbody class="data-table__body">
+              @for (purchase of purchases; track purchase.id) {
+                <tr class="data-table__row">
+                  <td class="data-table__cell">#{{ purchase.id }}</td><td class="data-table__cell">{{ date(purchase.fechaHora) }}</td>
+                  <td class="data-table__cell">{{ purchase.proveedorNombre }}</td><td class="data-table__cell">{{ purchase.detalles.length }}</td>
+                  <td class="data-table__cell purchases__amount">{{ money(purchase.subtotal) }}</td>
+                  <td class="data-table__cell purchases__amount">{{ money(purchase.iva) }}</td>
+                  <td class="data-table__cell purchases__amount">{{ money(purchase.total) }}</td>
+                  <td class="data-table__cell">{{ purchase.usuarioResponsable }}</td>
+                  <td class="data-table__cell"><button class="purchases__text-button" type="button" (click)="selectedPurchase = purchase" [attr.aria-label]="'Ver detalle de compra ' + purchase.id">Ver detalle</button></td>
+                </tr>
+              }
+            </tbody>
+          </app-data-table>
+        </section>
+      }
+    }
+  </section>
+  @if (providerFormOpen) {
+    <app-modal [open]="true" [title]="editingProvider ? 'Editar proveedor' : 'Registrar proveedor'" (close)="providerFormOpen = false">
+      <app-provider-form class="component" [mode]="editingProvider ? 'EDIT' : 'CREATE'" [provider]="editingProvider"
+        (save)="saveProvider($event)" (cancel)="providerFormOpen = false" />
+    </app-modal>
+  }
+  @if (drawerProvider; as provider) {
+    <app-provider-products-drawer class="component" [provider]="provider" [products]="products" [associations]="associations"
+      (close)="drawerProviderId = null" (addAssociation)="addAssociation($event)" (updatePrice)="updatePrice($event)" (removeAssociation)="removeAssociation($event)" />
+  }
+  @if (pendingDeactivation; as provider) {
+    <app-confirm-dialog [open]="true" title="Desactivar proveedor" [message]="'¿Deseas desactivar «' + provider.nombre + '»? Ya no podrá seleccionarse para nuevas compras.'"
+      confirmText="Desactivar" variant="danger" (confirm)="deactivateProvider()" (cancel)="pendingDeactivation = null" />
+  }
+  @if (confirmingPurchase) {
+    <app-confirm-dialog [open]="true" title="Confirmar compra" [message]="'¿Deseas confirmar esta compra por ' + money(total) + '? El registro no podrá modificarse.'"
+      confirmText="Confirmar compra" (confirm)="confirmPurchase()" (cancel)="confirmingPurchase = false" />
+  }
+  @if (selectedPurchase; as purchase) {
+    <app-purchase-detail-modal class="component" [purchase]="purchase" (close)="selectedPurchase = null" />
+  }
+} @else {
+  <section class="purchases__empty" aria-label="Acceso restringido"><h1 class="purchases__title">Compras y Proveedores</h1><p>Esta sección está disponible únicamente para Gerente.</p></section>
+}

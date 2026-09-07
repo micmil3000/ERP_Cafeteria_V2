@@ -1,0 +1,40 @@
+<section class="invoice-form__summary" aria-label="Resumen de la venta">
+  <h3 class="invoice-form__title">Venta #{{ sale().id }}</h3>
+  <p class="invoice-form__note">XML simulado para la práctica, sin validez fiscal.</p>
+  <dl class="invoice-form__totals">
+    <div class="invoice-form__row"><dt>Subtotal</dt><dd>{{ money(sale().subtotal) }}</dd></div>
+    <div class="invoice-form__row"><dt>IVA 16%</dt><dd>{{ money(sale().iva) }}</dd></div>
+    <div class="invoice-form__row"><dt>Total</dt><dd><strong>{{ money(sale().total) }}</strong></dd></div>
+  </dl>
+</section>
+<form class="invoice-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+        <div class="invoice-form__field">
+          <label for="invoice-rfc">RFC</label>
+          <input class="invoice-form__input" id="invoice-rfc" type="text" formControlName="rfc" required [attr.aria-invalid]="invalid('rfc')" aria-describedby="invoice-rfc-error" />
+          <span class="invoice-form__error" id="invoice-rfc-error">@if (invalid('rfc')) { Escribe el RFC. }</span>
+        </div>
+        <div class="invoice-form__field">
+          <label for="invoice-name">Nombre / Razón social</label>
+          <input class="invoice-form__input" id="invoice-name" type="text" formControlName="nombre" required [attr.aria-invalid]="invalid('nombre')" aria-describedby="invoice-name-error" />
+          <span class="invoice-form__error" id="invoice-name-error">@if (invalid('nombre')) { Escribe el nombre o razón social. }</span>
+        </div>
+        <div class="invoice-form__field">
+          <label for="invoice-postal">Código postal</label>
+          <input class="invoice-form__input" id="invoice-postal" type="text" inputmode="numeric" maxlength="5" formControlName="codigoPostal" required [attr.aria-invalid]="invalid('codigoPostal')" aria-describedby="invoice-postal-error" />
+          <span class="invoice-form__error" id="invoice-postal-error">@if (invalid('codigoPostal')) { Ingresa cinco dígitos. }</span>
+        </div>
+        <div class="invoice-form__field">
+          <label for="invoice-regime">Régimen fiscal</label>
+          <input class="invoice-form__input" id="invoice-regime" type="text" formControlName="regimen" required [attr.aria-invalid]="invalid('regimen')" aria-describedby="invoice-regime-error" />
+          <span class="invoice-form__error" id="invoice-regime-error">@if (invalid('regimen')) { Escribe el régimen fiscal. }</span>
+        </div>
+        <div class="invoice-form__field">
+          <label for="invoice-use">Uso de factura</label>
+          <input class="invoice-form__input" id="invoice-use" type="text" formControlName="uso" required [attr.aria-invalid]="invalid('uso')" aria-describedby="invoice-use-error" />
+          <span class="invoice-form__error" id="invoice-use-error">@if (invalid('uso')) { Escribe el uso de factura. }</span>
+        </div>
+        <footer class="invoice-form__actions">
+          <button class="invoice-form__button invoice-form__button--secondary" type="button" (click)="cancel.emit()">Cancelar</button>
+          <button class="invoice-form__button" type="submit">Generar XML</button>
+        </footer>
+      </form>

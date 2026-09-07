@@ -1,1 +1,37 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap');
+
+:root {
+  --color-background: #F7F3EA;
+  --color-surface: #FFFCF7;
+  --color-surface-secondary: #EFE8DC;
+  --color-sidebar: #2F3028;
+  --color-sidebar-hover: #3B4336;
+  --color-sidebar-active: #526B57;
+  --color-sidebar-text: #F8F4EC;
+  --color-sidebar-text-muted: #C9C2B5;
+  --color-primary: #6F8A72;
+  --color-primary-hover: #5C755F;
+  --color-primary-light: #E3ECE2;
+  --color-primary-dark: #3F5945;
+  --color-secondary: #C9785D;
+  --color-accent: #D8B26E;
+  --color-text-primary: #332E28;
+  --color-text-secondary: #665E55;
+  --color-text-muted: #91877C;
+  --color-border: #DED6CA;
+  --color-divider: #E9E2D8;
+  font-family: 'Nunito Sans', sans-serif;
+  color: var(--color-text-primary);
+  background: var(--color-background);
+  font-synthesis: none;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; line-height: 1.5; }
+button, a { font: inherit; }
+button { color: inherit; }
+a { color: inherit; }
+button:focus-visible, a:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}

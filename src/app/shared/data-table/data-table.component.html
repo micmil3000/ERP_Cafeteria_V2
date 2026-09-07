@@ -1,0 +1,14 @@
+<div class="data-table" [class.data-table--empty]="empty()">
+  <div class="data-table__wrapper" role="region" [attr.aria-label]="label()" tabindex="0">
+    <!-- Proyectar thead y tbody con las clases data-table__head, __header, __body, __row y __cell. -->
+    <table class="data-table__table" [attr.aria-label]="label()">
+      <ng-content select="thead" />
+      <tbody class="data-table__body data-table__empty-body" [hidden]="!empty()">
+        <tr class="data-table__row">
+          <td class="data-table__empty" [attr.colspan]="columnCount()">{{ emptyMessage() }}</td>
+        </tr>
+      </tbody>
+      <ng-content select="tbody" />
+    </table>
+  </div>
+</div>
