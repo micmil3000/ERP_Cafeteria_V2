@@ -1,4 +1,5 @@
 <form class="employee-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <!-- Iteración para mostrar los campos del trabajador -->
   @for (field of fields; track field.key) {
     <div class="employee-form__field">
       <label [for]="'employee-' + field.key">{{ field.label }}</label>
@@ -7,12 +8,14 @@
       <span class="employee-form__error" [id]="'employee-error-' + field.key">@if (invalid(field.key)) { {{ field.error }} }</span>
     </div>
   }
+  <!-- Campo para ingresar el salario -->
   <div class="employee-form__field">
     <label for="employee-salary">Salario (MXN)</label>
     <input class="employee-form__input" id="employee-salary" type="number" min="0.01" max="1000000" step="0.01" formControlName="salario" required
       [attr.aria-invalid]="invalid('salario')" aria-describedby="employee-salary-error" />
     <span class="employee-form__error" id="employee-salary-error">@if (invalid('salario')) { Usa un importe positivo de hasta un millón, con máximo dos decimales. }</span>
   </div>
+  <!-- Botones del formulario -->
   <footer class="employee-form__actions">
     <button class="employee-form__button employee-form__button--secondary" type="button" (click)="cancel.emit()">Cancelar</button>
     <button class="employee-form__button" type="submit">Guardar trabajador</button>

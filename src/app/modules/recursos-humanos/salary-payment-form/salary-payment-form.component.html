@@ -1,4 +1,5 @@
 <form class="salary-payment-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <!-- Campo para seleccionar al trabajador -->
   <div class="salary-payment-form__field">
     <label for="salary-employee">Trabajador activo</label>
     <select class="salary-payment-form__input" id="salary-employee" formControlName="empleadoId" required [attr.aria-invalid]="invalid('empleadoId')" aria-describedby="salary-employee-error">
@@ -7,12 +8,15 @@
     </select>
     <span class="salary-payment-form__error" id="salary-employee-error">@if (invalid('empleadoId')) { Selecciona un trabajador activo. }</span>
   </div>
+  <!-- Campo para escribir el periodo del pago -->
   <div class="salary-payment-form__field">
     <label for="salary-period">Periodo</label>
     <input class="salary-payment-form__input" id="salary-period" type="text" formControlName="periodo" placeholder="Septiembre 2026" required [attr.aria-invalid]="invalid('periodo')" aria-describedby="salary-period-error" />
     <span class="salary-payment-form__error" id="salary-period-error">@if (invalid('periodo')) { Escribe el periodo del pago. }</span>
   </div>
+  <!-- Resumen del salario a pagar -->
   <dl class="salary-payment-form__summary"><dt>Salario a pagar</dt><dd>{{ money(employee?.salario ?? 0) }}</dd></dl>
+  <!-- Botones del formulario -->
   <footer class="salary-payment-form__actions">
     <button class="salary-payment-form__button salary-payment-form__button--secondary" type="button" (click)="cancel.emit()">Cancelar</button>
     <button class="salary-payment-form__button" type="submit">Confirmar pago</button>

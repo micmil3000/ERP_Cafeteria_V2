@@ -1,14 +1,18 @@
 <section class="sales" aria-label="Ventas y facturación">
+  <!-- Encabezado y pestañas de ventas -->
   <app-page-header title="Ventas" description="Registra nuevas ventas y consulta el historial de operaciones de Savia Café." />
   <app-tabs [tabs]="tabs" [activeTab]="activeTab" (tabChange)="activeTab = $event" />
 
+  <!-- Sección para registrar una nueva venta -->
   @if (activeTab === 'new') {
     <section class="sales__content" aria-label="Nueva venta">
       <section class="sales__catalog" aria-label="Catálogo de productos">
+        <!-- Filtros para buscar productos -->
         <div class="sales__toolbar">
           <label class="sales__search-label" for="sales-search">Encuentra algo para disfrutar</label>
           <input class="sales__search" id="sales-search" type="search" placeholder="Buscar por nombre…" [(ngModel)]="search" />
         </div>
+        <!-- Iteración para mostrar las categorías -->
         <div class="sales__categories" role="group" aria-label="Categorías de productos">
           <button class="sales__category" [class.sales__category--active]="category === ''" type="button"
             [attr.aria-pressed]="category === ''" (click)="category = ''">Todos</button>
@@ -17,6 +21,7 @@
               [attr.aria-pressed]="category === item" (click)="category = item">{{ item }}</button>
           }
         </div>
+        <!-- Iteración para mostrar los productos filtrados -->
         <div class="sales__products">
           @for (product of filteredProducts; track product.id) {
             <app-product-card [product]="product" (add)="addProduct($event)" />
@@ -25,6 +30,7 @@
           }
         </div>
       </section>
+      <!-- Resumen de productos agregados a la venta -->
       <app-sale-summary class="sales__summary" 
         [items]="cart" 
         [subtotal]="subtotal" 
@@ -34,6 +40,7 @@
         (checkout)="checkout()" (cancel)="cancelOpen = true" />
     </section>
   } @else {
+    <!-- Tabla del historial de ventas -->
     <section class="sales__history" aria-label="Historial de ventas">
       <header class="sales__history-header"><h2 class="sales__heading">Ventas confirmadas</h2><p class="sales__history-context">{{ currentRole === 'GERENTE' ? 'Todas las ventas' : 'Ventas de ' + currentUser }} · {{ visibleSales.length }} registros</p></header>
       <app-data-table label="Historial de ventas confirmadas" [empty]="visibleSales.length === 0" [columnCount]="9">
@@ -64,14 +71,17 @@
   }
 </section>
 
+<!-- Confirmación para cancelar la venta -->
 @if (cancelOpen && cart.length) {
   <app-confirm-dialog [open]="true" title="Cancelar venta" message="¿Deseas cancelar la venta actual? Se vaciará el resumen sin afectar existencias."
     confirmText="Cancelar venta" variant="danger" (confirm)="cancelSale()" (cancel)="cancelOpen = false" />
 }
+<!-- Modal para realizar el pago -->
 @if (paymentOpen) {
   <app-payment-modal [subtotal]="subtotal" [iva]="iva" [total]="total" [error]="paymentError"
     (confirm)="confirmPayment($event)" (close)="paymentOpen = false" />
 }
+<!-- Modal para mostrar el detalle de una venta -->
 @if (selectedSale; as sale) {
   <app-sale-detail-modal [sale]="sale" (close)="selectedSale = null" />
 }

@@ -1,5 +1,7 @@
+<!-- Modal para mostrar el detalle de la venta -->
 <app-modal [open]="true" [title]="'Venta #' + sale().id" (close)="close.emit()">
   <section class="sale-detail" aria-label="Detalle de venta confirmada">
+    <!-- Datos generales de la venta -->
     <dl class="sale-detail__meta">
       <div class="sale-detail__row"><dt>Fecha y hora</dt><dd>{{ date(sale().fechaHora) }}</dd></div>
       <div class="sale-detail__row"><dt>Responsable</dt><dd>{{ sale().usuario }}</dd></div>
@@ -7,11 +9,13 @@
       @if (sale().referencia) { <div class="sale-detail__row"><dt>Referencia</dt><dd>{{ sale().referencia }}</dd></div> }
     </dl>
     <h3 class="sale-detail__title">Productos</h3>
+    <!-- Iteración para mostrar los productos vendidos -->
     <ul class="sale-detail__items">
       @for (item of sale().items; track item.productId) {
         <li class="sale-detail__item"><span><strong>{{ item.nombre }}</strong><small class="sale-detail__unit">{{ item.cantidad }} × {{ money(item.precio) }}</small></span><strong>{{ money(item.precio * item.cantidad) }}</strong></li>
       }
     </ul>
+    <!-- Totales y estado de la factura -->
     <dl class="sale-detail__totals">
       <div class="sale-detail__row"><dt>Subtotal</dt><dd>{{ money(sale().subtotal) }}</dd></div>
       <div class="sale-detail__row"><dt>IVA 16%</dt><dd>{{ money(sale().iva) }}</dd></div>

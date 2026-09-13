@@ -30,11 +30,13 @@ interface Movement {
   templateUrl: './finance-page.component.html',
 })
 export class FinancePageComponent {
+  // Variables para controlar categorías, orígenes, filtros, modal de registro de gasto y movimiento seleccionado.
   protected readonly categories = ['Ventas', 'Compras', 'Salarios', 'Servicios', 'Renta', 'Mantenimiento', 'Limpieza', 'Publicidad', 'Otros'];
   protected readonly origins = ['VENTA', 'COMPRA', 'SALARIO', 'MANUAL'];
   protected filters = { desde: '', hasta: '', tipo: '', categoria: '', origen: '' };
   protected expenseOpen = false;
   protected selectedMovement: Movement | null = null;
+  //Mensaje para notificar al usuario de cuántos movimientos financieros fueron encontrados en base al filtro aplicado
   protected notice = '';
 
   // Datos locales de ejemplo; el historial vuelve a este estado al recargar.
@@ -161,10 +163,12 @@ export class FinancePageComponent {
     }
   ];
 
+  //Método para identificar si las fechas son inválidas en el rango de filtros seleccionados
   protected get invalidDates(): boolean {
     return !!(this.filters.desde && this.filters.hasta && this.filters.desde > this.filters.hasta);
   }
 
+  //Movimientos financieros filtrados
   protected get filteredMovements(): readonly Movement[] {
     if (this.invalidDates) return [];
     const f = this.filters;
@@ -175,15 +179,18 @@ export class FinancePageComponent {
     ).sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id - a.id);
   }
 
+  //Total calculado por tipo de movimiento financiero (Ingreso o Gasto)
   private totalFor(type: Movement['tipo']): number {
     return this.filteredMovements.filter((m) => m.tipo === type)
       .reduce((sum, m) => sum + Math.round(m.total * 100), 0) / 100;
   }
 
+  //Variables de ingreso, gasto y ganacia calculada
   protected get income(): number { return this.totalFor('INGRESO'); }
   protected get expenses(): number { return this.totalFor('GASTO'); }
   protected get profit(): number { return (Math.round(this.income * 100) - Math.round(this.expenses * 100)) / 100; }
 
+  //Resumen financiero (ingresos, gastos y ganancias)
   protected get summary() {
     return [
       { label: 'Ingresos', value: this.income, detail: 'Ventas confirmadas del periodo', tone: 'sage', icon: 'M12 19V5 M6 11l6-6 6 6' },
@@ -192,6 +199,7 @@ export class FinancePageComponent {
     ];
   }
 
+  //Obtiene porcentaje de ingresos y gastos para gráfica de prueba
   protected get comparison() {
     const max = Math.max(this.income, this.expenses, 1);
     return [
@@ -200,6 +208,7 @@ export class FinancePageComponent {
     ];
   }
 
+  //Obtiene los gastos en base a la categoría seleccionada 
   protected get categoryExpenses() {
     const groups = this.categories.map((label) => ({
       label,
@@ -210,18 +219,22 @@ export class FinancePageComponent {
     return groups.map((group, index) => ({ ...group, percentage: group.total / max * 100, tone: ['sage', 'cinnamon', 'terracotta'][index % 3] }));
   }
 
+  //Devuelve valor de dinero en moneda mexicana
   protected money(value: number): string {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
   }
 
+  //Devuelve fecha con formato dia/mes/año
   protected date(value: string): string {
     return value.split('-').reverse().join('/');
   }
 
+  //Limpia los filtros seleccionados
   protected clearFilters(): void {
     this.filters = { desde: '', hasta: '', tipo: '', categoria: '', origen: '' };
   }
 
+  //Método para guardar un nuevo gasto
   protected saveExpense(value: ExpenseFormValue): void {
     const cents = Math.round(value.subtotal * 100);
     const ivaCents = Math.round(cents * 0.16);

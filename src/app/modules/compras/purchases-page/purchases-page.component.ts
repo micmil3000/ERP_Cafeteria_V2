@@ -57,6 +57,7 @@ export interface Purchase {
   templateUrl: './purchases-page.component.html',
 })
 export class PurchasesPageComponent {
+  //Variables para manejar todas las funcionalidades. Son de prueba
   protected readonly currentRole: 'GERENTE' | 'TRABAJADOR' = 'GERENTE';
   protected readonly tabs = [{ id: 'purchases', label: 'Compras' }, { id: 'providers', label: 'Proveedores' }];
   protected activeTab = 'purchases';
@@ -72,6 +73,7 @@ export class PurchasesPageComponent {
   protected selectedPurchase: Purchase | null = null;
   protected notice = '';
 
+  //Arreglos de información de prueba para proveedores, productos, productos asociados y compras
   protected providers: readonly Provider[] = [
     { id: 1, nombre: 'Café Sierra Dorada', contacto: 'Mariana Ruiz', telefono: '3315872460', correo: 'ventas@sierra.example', direccion: 'Av. Vallarta 1840, Guadalajara', estado: 'ACTIVO' },
     { id: 2, nombre: 'Insumos Café del Centro', contacto: 'Carlos Navarro', telefono: '3326741958', correo: 'pedidos@insumoscentro.example', direccion: 'Calle Morelos 625, Guadalajara', estado: 'ACTIVO' },
@@ -110,6 +112,7 @@ export class PurchasesPageComponent {
     this.mockPurchase(304, 1, 2, 8, 29, '2026-09-06T10:20:00-06:00'),
   ];
 
+  //Métodos para obtener o calcular la información para pruebas
   protected get activeProviders() { return this.providers.filter((p) => p.estado === 'ACTIVO'); }
   protected get filteredProviders() {
     const query = this.search.trim().toLocaleLowerCase('es-MX');
@@ -149,11 +152,13 @@ export class PurchasesPageComponent {
     return Number.isFinite(value) && value > 0 && value <= 1000000 && Math.abs(value * 100 - Math.round(value * 100)) < 0.000001;
   }
 
+  //Método para abrir el modal de agregar o editar proveedor
   protected openProvider(provider: Provider | null = null): void {
     if (this.currentRole !== 'GERENTE') return;
     this.editingProvider = provider;
     this.providerFormOpen = true;
   }
+  //Método para guardar un nuevo proveedor 
   protected saveProvider(value: Omit<Provider, 'id' | 'estado'>): void {
     if (this.currentRole !== 'GERENTE' || !this.providerFormOpen) return;
     this.providers = this.editingProvider
@@ -163,6 +168,7 @@ export class PurchasesPageComponent {
     this.editingProvider = null;
     this.notice = 'Proveedor guardado correctamente.';
   }
+  //Método para "eliminar" o desactivar un proveedor
   protected deactivateProvider(): void {
     if (this.currentRole !== 'GERENTE' || !this.pendingDeactivation) return;
     const id = this.pendingDeactivation.id;
@@ -171,6 +177,7 @@ export class PurchasesPageComponent {
     this.pendingDeactivation = null;
     this.notice = 'Proveedor desactivado. Se conserva para consulta.';
   }
+  //Método para agregar un nuevo producto asociado a un proveedor en específico
   protected addAssociation(value: { productoId: number; precioCompra: number }): void {
     const id = this.drawerProviderId;
     if (this.currentRole !== 'GERENTE' || !this.drawerProvider || !id || !this.validPrice(value.precioCompra) ||
@@ -178,39 +185,47 @@ export class PurchasesPageComponent {
       this.associations.some((a) => a.proveedorId === id && a.productoId === value.productoId)) return;
     this.associations = [...this.associations, { proveedorId: id, ...value }];
   }
+  //Método para actualizar precio de un producto del proveedor
   protected updatePrice(value: { productoId: number; precioCompra: number }): void {
     if (this.currentRole !== 'GERENTE' || !this.drawerProvider || !this.validPrice(value.precioCompra)) return;
     this.associations = this.associations.map((a) => a.proveedorId === this.drawerProviderId && a.productoId === value.productoId
       ? { ...a, precioCompra: value.precioCompra } : a);
   }
+  //Método para eliminar una asociación de un proveedor con un producto
   protected removeAssociation(productoId: number): void {
     if (this.currentRole !== 'GERENTE' || !this.drawerProvider) return;
     this.associations = this.associations.filter((a) => !(a.proveedorId === this.drawerProviderId && a.productoId === productoId));
     if (this.selectedProviderId === this.drawerProviderId) this.removeLine(productoId);
   }
+  //Método para seleccionar un proveedor al realizar una compra
   protected changeProvider(id: number | null): void {
     if (this.currentRole !== 'GERENTE') return;
     this.selectedProviderId = this.activeProviders.some((p) => p.id === id) ? id : null;
     this.cart = [];
     this.notice = '';
   }
+  //Método para agregar producto a la compra
   protected addProduct(id: number): void {
     if (this.currentRole !== 'GERENTE' || !this.availableProducts.some((p) => p.id === id)) return;
     const line = this.cart.find((l) => l.productoId === id);
     if (line) this.setQuantity(id, line.cantidad + 1);
     else this.cart = [...this.cart, { productoId: id, cantidad: 1 }];
   }
+  //Método para ajustar la cantidad de un producto de la compra
   protected setQuantity(id: number, value: number | null): void {
     if (this.currentRole !== 'GERENTE') return;
     this.cart = this.cart.map((l) => l.productoId === id ? { ...l, cantidad: value ?? 0 } : l);
   }
+  //Método para quitar un producto de la compra
   protected removeLine(id: number): void {
     if (this.currentRole !== 'GERENTE') return;
     this.cart = this.cart.filter((l) => l.productoId !== id);
   }
+  //Método para mostrar modal de confirmación
   protected requestConfirmation(): void {
     if (this.canConfirm) this.confirmingPurchase = true;
   }
+  //Método para confirmar la compra y guardarla
   protected confirmPurchase(): void {
     if (!this.confirmingPurchase || !this.canConfirm) { this.confirmingPurchase = false; return; }
     const provider = this.activeProviders.find((p) => p.id === this.selectedProviderId)!;
@@ -230,6 +245,7 @@ export class PurchasesPageComponent {
     this.notice = 'Compra #' + purchase.id + ' registrada correctamente.';
     this.purchaseView = 'history';
   }
+  //Método para generar una compra de prueba
   private mockPurchase(id: number, providerId: number, productId: number, quantity: number, price: number, date: string): Purchase {
     const cents = Math.round(price * 100) * quantity;
     const tax = Math.round(cents * 0.16);

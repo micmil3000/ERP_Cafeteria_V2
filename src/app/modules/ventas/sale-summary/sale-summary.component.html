@@ -1,5 +1,7 @@
 <aside class="sale-summary" aria-label="Resumen de venta">
+  <!-- Encabezado del resumen de venta -->
   <header class="sale-summary__header"><h2 class="sale-summary__title">Resumen de venta</h2><p class="sale-summary__subtitle">Un buen momento, en cada pedido.</p></header>
+  <!-- Iteración para mostrar los productos agregados -->
   <ul class="sale-summary__items">
     @for (item of items(); track item.productId) {
       <li class="sale-summary__item">
@@ -20,11 +22,13 @@
     }
   </ul>
   <p class="sale-summary__message" role="status">{{ message() }}</p>
+  <!-- Totales de la venta -->
   <dl class="sale-summary__totals">
     <div class="sale-summary__total-row"><dt>Subtotal</dt><dd>{{ money(subtotal()) }}</dd></div>
     <div class="sale-summary__total-row"><dt>IVA 16%</dt><dd>{{ money(iva()) }}</dd></div>
     <div class="sale-summary__total-row sale-summary__total-row--grand"><dt>Total</dt><dd>{{ money(total()) }}</dd></div>
   </dl>
+  <!-- Acciones para cobrar o cancelar la venta -->
   <footer class="sale-summary__actions">
     <button class="sale-summary__checkout" type="button" [disabled]="!items().length" (click)="checkout.emit()">Cobrar</button>
     @if (items().length) { <button class="sale-summary__cancel" type="button" (click)="cancel.emit()">Cancelar venta</button> }

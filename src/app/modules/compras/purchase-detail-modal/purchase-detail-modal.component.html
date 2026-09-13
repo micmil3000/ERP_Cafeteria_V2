@@ -1,12 +1,26 @@
+<!-- Modal para mostrar información de una compra -->
 <app-modal [open]="true" [title]="'Compra #' + purchase().id" (close)="close.emit()">
+<!-- Sección para mostrar el detalle de la compra -->
   <section class="purchase-detail" aria-label="Compra confirmada de solo lectura">
+    <!-- Información de fecha, proveedor y usuario responsable de la compra -->
     <dl class="purchase-detail__meta">
-      <div class="purchase-detail__row"><dt>Fecha y hora</dt><dd>{{ date(purchase().fechaHora) }}</dd></div>
-      <div class="purchase-detail__row"><dt>Proveedor</dt><dd>{{ purchase().proveedorNombre }}</dd></div>
-      <div class="purchase-detail__row"><dt>Responsable</dt><dd>{{ purchase().usuarioResponsable }}</dd></div>
+      <div class="purchase-detail__row">
+        <dt>Fecha y hora</dt>
+        <dd>{{ date(purchase().fechaHora) }}</dd>
+      </div>
+      <div class="purchase-detail__row">
+        <dt>Proveedor</dt>
+        <dd>{{ purchase().proveedorNombre }}</dd>
+      </div>
+      <div class="purchase-detail__row">
+        <dt>Responsable</dt>
+        <dd>{{ purchase().usuarioResponsable }}</dd>
+      </div>
     </dl>
     <h3 class="purchase-detail__title">Productos adquiridos</h3>
+    <!-- Listado de los productos comprados -->
     <ul class="purchase-detail__products">
+      <!-- Iteración de todos los productos que se compraron mostrando nombre, cantidad, precio unitario, subtotal  -->
       @for (line of purchase().detalles; track line.productoId) {
         <li class="purchase-detail__product">
           <span><strong>{{ line.nombre }}</strong><small class="purchase-detail__price">{{ line.cantidad }} × {{ money(line.precioCompra) }}</small></span>
@@ -14,11 +28,13 @@
         </li>
       }
     </ul>
+    <!-- Muestra información del precio de la compra: subtotal, IVA y total -->
     <dl class="purchase-detail__totals">
       <div class="purchase-detail__row"><dt>Subtotal</dt><dd>{{ money(purchase().subtotal) }}</dd></div>
       <div class="purchase-detail__row"><dt>IVA 16%</dt><dd>{{ money(purchase().iva) }}</dd></div>
       <div class="purchase-detail__row purchase-detail__row--total"><dt>Total</dt><dd>{{ money(purchase().total) }}</dd></div>
     </dl>
   </section>
+  <!-- Botón para cerrar el modal de detalle de la compra -->
   <button modal-footer class="purchase-detail__button" type="button" (click)="close.emit()">Cerrar</button>
 </app-modal>

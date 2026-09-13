@@ -1,49 +1,80 @@
+<!-- Form para registrar gasto -->
 <form class="expense-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <!-- Campos del formulario con sus respectivos mensajes de error en caso de que no sea válido -->
   <div class="expense-form__field">
     <label class="expense-form__label" for="expense-date">Fecha</label>
     <input class="expense-form__input" id="expense-date" type="date" formControlName="fecha" required
       [attr.aria-invalid]="invalid('fecha')" aria-describedby="expense-date-error" />
-    <span class="expense-form__error" id="expense-date-error">@if (invalid('fecha')) { Selecciona una fecha. }</span>
+    <span class="expense-form__error" id="expense-date-error">
+      @if (invalid('fecha')) { 
+        Selecciona una fecha. 
+      }
+    </span>
   </div>
   <div class="expense-form__field">
     <label class="expense-form__label" for="expense-concept">Concepto</label>
     <input class="expense-form__input" id="expense-concept" type="text" formControlName="concepto" required
       [attr.aria-invalid]="invalid('concepto')" aria-describedby="expense-concept-error" />
-    <span class="expense-form__error" id="expense-concept-error">@if (invalid('concepto')) { Escribe el concepto del gasto. }</span>
+    <span class="expense-form__error" id="expense-concept-error">
+      @if (invalid('concepto')) { 
+        Escribe el concepto del gasto. 
+      }
+    </span>
   </div>
   <div class="expense-form__field">
     <label class="expense-form__label" for="expense-category">Categoría</label>
     <select class="expense-form__select" id="expense-category" formControlName="categoria" required
       [attr.aria-invalid]="invalid('categoria')" aria-describedby="expense-category-error">
       <option value="">Selecciona una categoría</option>
-      @for (category of categories; track category) { <option [value]="category">{{ category }}</option> }
+      <!-- Cargar dinámicamente las opciones del select de categoría -->
+      @for (category of categories; track category) {
+        <option [value]="category">{{ category }}</option> 
+      }
     </select>
-    <span class="expense-form__error" id="expense-category-error">@if (invalid('categoria')) { Selecciona una categoría. }</span>
+    <span class="expense-form__error" id="expense-category-error">
+      @if (invalid('categoria')) { 
+        Selecciona una categoría. 
+      }
+    </span>
   </div>
   <div class="expense-form__field">
     <label class="expense-form__label" for="expense-subtotal">Subtotal (MXN)</label>
     <input class="expense-form__input" id="expense-subtotal" type="number" min="0.01" max="999999999.99" step="0.01"
       formControlName="subtotal" required [attr.aria-invalid]="invalid('subtotal')" aria-describedby="expense-subtotal-error" />
-    <span class="expense-form__error" id="expense-subtotal-error">@if (invalid('subtotal')) { Ingresa un importe mayor que cero, con máximo dos decimales y menor a mil millones. }</span>
+    <span class="expense-form__error" id="expense-subtotal-error">
+      @if (invalid('subtotal')) { 
+        Ingresa un importe mayor que cero, con máximo dos decimales y menor a mil millones. 
+      }
+    </span>
   </div>
   <div class="expense-form__field">
     <label class="expense-form__label" for="expense-payment">Método de pago</label>
     <select class="expense-form__select" id="expense-payment" formControlName="metodoPago" required
       [attr.aria-invalid]="invalid('metodoPago')" aria-describedby="expense-payment-error">
       <option value="">Selecciona un método</option>
-      @for (method of paymentMethods; track method) { <option [value]="method">{{ method }}</option> }
+      <!-- Cargar dinámicamente las opciones del select de método de pago -->
+      @for (method of paymentMethods; track method) { 
+        <option [value]="method">{{ method }}</option> 
+      }
     </select>
-    <span class="expense-form__error" id="expense-payment-error">@if (invalid('metodoPago')) { Selecciona un método de pago. }</span>
+    <span class="expense-form__error" id="expense-payment-error">
+      @if (invalid('metodoPago')) { 
+        Selecciona un método de pago. 
+      }
+    </span>
   </div>
+  <!-- Área para agregar observaciones. Como es opcional no tiene validación como las demás -->
   <div class="expense-form__field">
     <label class="expense-form__label" for="expense-notes">Observaciones (opcional)</label>
     <textarea class="expense-form__textarea" id="expense-notes" formControlName="observaciones" rows="3"></textarea>
   </div>
+  <!-- Resumen del gasto: subtotal, IVA, total -->
   <dl class="expense-form__summary" aria-live="polite">
     <div class="expense-form__summary-row"><dt>Subtotal</dt><dd>{{ money(subtotalCents) }}</dd></div>
     <div class="expense-form__summary-row"><dt>IVA 16%</dt><dd>{{ money(ivaCents) }}</dd></div>
     <div class="expense-form__summary-row expense-form__summary-row--total"><dt>Total</dt><dd>{{ money(subtotalCents + ivaCents) }}</dd></div>
   </dl>
+  <!-- Botones para cancelar o guardar gasto, emitiendo sus respectivos eventos -->
   <footer class="expense-form__actions">
     <button class="expense-form__button expense-form__button--cancel" type="button" (click)="cancel.emit()">Cancelar</button>
     <button class="expense-form__button" type="submit">Guardar gasto</button>

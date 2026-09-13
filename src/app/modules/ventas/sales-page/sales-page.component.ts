@@ -63,9 +63,11 @@ export interface SalesNavigationState {
   templateUrl: './sales-page.component.html',
 })
 export class SalesPageComponent {
+  //Variables para controlar la navegación y recuperar la sesión
   private readonly router = inject(Router);
   private readonly location = inject(Location);
 
+  //Recupera los productos y ventas guardados en la navegación
   constructor() {
     const state = (this.router.currentNavigation()?.extras.state ?? this.location.getState()) as { salesSession?: SalesNavigationState } | null;
     const session = state?.salesSession;
@@ -75,6 +77,7 @@ export class SalesPageComponent {
     }
   }
 
+  //Variables para controlar rol, filtros, carrito y modales
   protected readonly currentRole: 'GERENTE' | 'TRABAJADOR' = 'GERENTE';
   protected readonly currentUser = 'Ana Torres';
   protected readonly tabs = [{ id: 'new', label: 'Nueva venta' }, { id: 'history', label: 'Historial' }];
@@ -101,6 +104,7 @@ export class SalesPageComponent {
     { id: 8, nombre: 'Pastel de Chocolate', categoria: 'Postres', precio: 75, stock: 1, stockMinimo: 2, imagen: '/images/pastel-chocolate.jpg' },
   ];
 
+  //Datos de prueba del historial de ventas
   protected sales: readonly Sale[] = [
     this.mockSale(1051, '2026-09-03T09:20:00-06:00', 'Ana Torres', 1, 2, 'Efectivo', true),
     this.mockSale(1052, '2026-09-04T11:10:00-06:00', 'Carlos Ruiz', 3, 3, 'Tarjeta', false),
@@ -108,22 +112,26 @@ export class SalesPageComponent {
     this.mockSale(1054, '2026-09-06T08:35:00-06:00', 'Carlos Ruiz', 7, 2, 'Efectivo', true),
   ];
 
+  //Obtiene los productos filtrados por nombre y categoría
   protected get filteredProducts() {
     const query = this.search.trim().toLocaleLowerCase('es-MX');
     return this.products.filter((p) => p.nombre.toLocaleLowerCase('es-MX').includes(query) && (!this.category || p.categoria === this.category));
   }
 
+  //Obtiene las ventas visibles según el rol actual
   protected get visibleSales() {
     return this.sales.filter((s) => this.currentRole === 'GERENTE' || s.usuario === this.currentUser)
       .sort((a, b) => b.id - a.id);
   }
 
+  //Calcula el subtotal, IVA y total del carrito
   protected get subtotal(): number {
     return this.cart.reduce((sum, item) => sum + Math.round(item.precio * 100) * item.cantidad, 0) / 100;
   }
   protected get iva(): number { return Math.round(Math.round(this.subtotal * 100) * 0.16) / 100; }
   protected get total(): number { return (Math.round(this.subtotal * 100) + Math.round(this.iva * 100)) / 100; }
 
+  //Métodos para mostrar dinero, fecha y hora
   protected money(value: number): string {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
   }
@@ -131,6 +139,7 @@ export class SalesPageComponent {
     return new Intl.DateTimeFormat('es-MX', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Mexico_City' }).format(new Date(value));
   }
 
+  //Método para agregar un producto al carrito
   protected addProduct(product: Product): void {
     if (this.paymentOpen) return;
     const current = this.products.find((p) => p.id === product.id);
@@ -146,23 +155,27 @@ export class SalesPageComponent {
     this.message = '';
   }
 
+  //Método para aumentar la cantidad de un producto
   protected increase(id: number): void {
     const product = this.products.find((p) => p.id === id);
     if (product) this.addProduct(product);
   }
 
+  //Método para disminuir la cantidad de un producto
   protected decrease(id: number): void {
     if (this.paymentOpen) return;
     this.cart = this.cart.map((item) => item.productId === id && item.cantidad > 1 ? { ...item, cantidad: item.cantidad - 1 } : item);
     this.message = '';
   }
 
+  //Método para eliminar un producto del carrito
   protected remove(id: number): void {
     if (this.paymentOpen) return;
     this.cart = this.cart.filter((item) => item.productId !== id);
     this.message = '';
   }
 
+  //Método para cancelar la venta actual
   protected cancelSale(): void {
     if (!this.cancelOpen || this.paymentOpen) return;
     this.cart = [];
@@ -170,6 +183,7 @@ export class SalesPageComponent {
     this.message = 'Venta en preparación cancelada. No se modificaron existencias.';
   }
 
+  //Valida las existencias antes de cobrar
   private stockError(): string {
     if (!this.cart.length) return 'Agrega productos antes de cobrar.';
     const invalid = this.cart.find((item) => {
@@ -179,6 +193,7 @@ export class SalesPageComponent {
     return invalid ? 'Revisa ' + invalid.nombre + ': no hay stock suficiente para la cantidad solicitada.' : '';
   }
 
+  //Método para abrir el modal de pago
   protected checkout(): void {
     this.message = this.stockError();
     if (this.message) return;
@@ -186,6 +201,7 @@ export class SalesPageComponent {
     this.paymentOpen = true;
   }
 
+  //Método para confirmar el pago y guardar la venta
   protected confirmPayment(result: { approved: boolean; method: string }): void {
     if (!this.paymentOpen || !result.approved || !['Efectivo', 'Tarjeta', 'Transferencia'].includes(result.method)) return;
     this.paymentError = this.stockError();
@@ -209,10 +225,12 @@ export class SalesPageComponent {
     });
   }
 
+  //Método para abrir el detalle de una venta
   protected openDetail(sale: Sale): void {
     this.selectedSale = this.visibleSales.find((s) => s.id === sale.id) ?? null;
   }
 
+  //Genera una venta de prueba para el historial
   private mockSale(id: number, fechaHora: string, usuario: string, productId: number, cantidad: number, metodoPago: string, invoiced: boolean): Sale {
     const product = this.products.find((p) => p.id === productId)!;
     const subtotalCents = Math.round(product.precio * 100) * cantidad;

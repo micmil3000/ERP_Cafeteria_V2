@@ -13,6 +13,7 @@ import type { Sale, SalesNavigationState } from '../../ventas/sales-page/sales-p
   templateUrl: './ticket-page.component.html',
 })
 export class TicketPageComponent {
+  //Variables para controlar la venta, la factura y los avisos
   private readonly router = inject(Router);
   private readonly location = inject(Location);
   protected session: SalesNavigationState | null = null;
@@ -20,6 +21,7 @@ export class TicketPageComponent {
   protected invoiceOpen = false;
   protected notice = '';
 
+  //Recupera y valida la venta seleccionada
   constructor() {
     const state = (this.router.currentNavigation()?.extras.state ?? this.location.getState()) as { salesSession?: SalesNavigationState } | null;
     const session = state?.salesSession;
@@ -31,18 +33,22 @@ export class TicketPageComponent {
     this.sale = sale;
   }
 
+  //Devuelve valor de dinero en moneda mexicana
   protected money(value: number): string {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
   }
 
+  //Devuelve la fecha con formato mexicano
   protected date(value: string): string {
     return new Intl.DateTimeFormat('es-MX', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Mexico_City' }).format(new Date(value));
   }
 
+  //Devuelve la hora con formato mexicano
   protected time(value: string): string {
     return new Intl.DateTimeFormat('es-MX', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Mexico_City' }).format(new Date(value));
   }
 
+  //Método para finalizar y volver a ventas
   protected finish(): void {
     void this.router.navigate(['/ventas'], {
       replaceUrl: true,
@@ -50,10 +56,12 @@ export class TicketPageComponent {
     });
   }
 
+  //Método para abrir el formulario de factura
   protected openInvoice(): void {
     if (this.sale && !this.sale.factura) this.invoiceOpen = true;
   }
 
+  //Método para generar y guardar la factura
   protected generateInvoice(fiscal: Omit<NonNullable<Sale['factura']>, 'xml'>): void {
     const sale = this.sale;
     if (!this.invoiceOpen || !sale || sale.factura || !this.session) return;
@@ -70,6 +78,7 @@ export class TicketPageComponent {
     this.downloadXml();
   }
 
+  //Método para descargar el archivo XML
   protected downloadXml(): void {
     if (!this.sale?.factura?.xml) return;
     const url = URL.createObjectURL(new Blob([this.sale.factura.xml], { type: 'application/xml;charset=utf-8' }));
@@ -80,6 +89,7 @@ export class TicketPageComponent {
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
 
+  //Genera el contenido XML de la factura
   private invoiceXml(sale: Sale, fiscal: Omit<NonNullable<Sale['factura']>, 'xml'>): string {
     const escape = (value: string | number): string => String(value)
       .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]/g, '')

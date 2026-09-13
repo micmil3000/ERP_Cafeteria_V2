@@ -51,6 +51,7 @@ interface SalaryPayment {
   templateUrl: './human-resources-page.component.html',
 })
 export class HumanResourcesPageComponent {
+  //Variables para controlar rol, pestañas, avisos y modales
   protected readonly currentRole: 'GERENTE' | 'TRABAJADOR' = 'TRABAJADOR'; // Cambiar a 'GERENTE' para ver todas las funcionalidades
   protected activeTab = 'people';
   protected notice = '';
@@ -61,6 +62,7 @@ export class HumanResourcesPageComponent {
   protected paymentOpen = false;
   protected selectedPayment: SalaryPayment | null = null;
   protected readonly dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  //Datos de prueba de los trabajadores
   protected employees: readonly Employee[] = [
     { id: 1, nombre: 'Ana', apellidos: 'Torres', telefono: '3315872401', correo: 'gerente@savia.com', fechaContratacion: '2024-02-12', salario: 18500, estado: 'ACTIVO' },
     { id: 2, nombre: 'Carlos', apellidos: 'Ruiz', telefono: '3326741935', correo: 'trabajador@savia.com', fechaContratacion: '2025-01-20', salario: 9800, estado: 'ACTIVO' },
@@ -70,10 +72,12 @@ export class HumanResourcesPageComponent {
     { id: 6, nombre: 'Miguel', apellidos: 'Navarro', telefono: '3361387952', correo: 'miguel@savia.com', fechaContratacion: '2024-11-03', salario: 9100, estado: 'INACTIVO' },
   ];
 
+  //Horarios de trabajo por empleado
   protected schedules: Record<number, readonly WorkDay[]> = Object.fromEntries(this.employees.map((e) => [e.id,
     [1, 2, 3, 4, 5, 6, 0].map((dia) => ({ dia, descanso: dia === 0, entrada: '08:00', salida: '16:00' })),
   ]));
 
+  //Datos de prueba de asistencias
   protected attendance: readonly Attendance[] = [
     { id: 1, empleadoId: 1, fecha: '2026-09-02', entrada: '07:56', salida: '16:03', estado: 'PRESENTE' },
     { id: 2, empleadoId: 2, fecha: '2026-09-02', entrada: '08:11', salida: '16:01', estado: 'RETARDO' },
@@ -84,6 +88,7 @@ export class HumanResourcesPageComponent {
     { id: 7, empleadoId: 6, fecha: '2026-08-25', entrada: '08:00', salida: '16:00', estado: 'PRESENTE' },
   ];
 
+  //Datos de prueba de pagos de salario
   protected payments: readonly SalaryPayment[] = [
     { id: 1, empleadoId: 1, trabajador: 'Ana Torres', periodo: 'Agosto 2026', fecha: '2026-08-31', monto: 18500, responsable: 'Ana Torres' },
     { id: 2, empleadoId: 2, trabajador: 'Carlos Ruiz', periodo: 'Agosto 2026', fecha: '2026-08-31', monto: 9800, responsable: 'Ana Torres' },
@@ -93,6 +98,7 @@ export class HumanResourcesPageComponent {
     { id: 6, empleadoId: 6, trabajador: 'Miguel Navarro', periodo: 'Julio 2026', fecha: '2026-07-31', monto: 9100, responsable: 'Ana Torres' },
   ];
 
+  //Obtiene la información visible según el rol actual
   protected get currentEmployee(): Employee { return this.employees.find((e) => e.id === (this.currentRole === 'GERENTE' ? 1 : 2))!; }
   protected get tabs() {
     return this.currentRole === 'GERENTE'
@@ -106,16 +112,19 @@ export class HumanResourcesPageComponent {
   }
   protected get visiblePayments() { return this.payments.filter((p) => this.currentRole === 'GERENTE' || p.empleadoId === this.currentEmployee.id); }
   protected get todayAttendance() { return this.attendance.find((a) => a.empleadoId === this.currentEmployee.id && a.fecha === this.clock().fecha); }
+  //Métodos para mostrar nombres, dinero, fechas y horarios
   protected name(employee: Employee): string { return employee.nombre + ' ' + employee.apellidos; }
   protected employeeName(id: number): string { const e = this.employees.find((e) => e.id === id); return e ? this.name(e) : 'Trabajador'; }
   protected money(value: number): string { return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value); }
   protected date(value: string): string { return value.split('-').reverse().join('/'); }
   protected scheduleFor(id: number): readonly WorkDay[] { return this.schedules[id] ?? []; }
+  //Obtiene la fecha y hora actual de México
   private clock() {
     const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Mexico_City', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date());
     const part = (type: string) => parts.find((p) => p.type === type)!.value;
     return { fecha: part('year') + '-' + part('month') + '-' + part('day'), hora: part('hour') + ':' + part('minute') };
   }
+  //Método para registrar la entrada del trabajador
   protected registerEntry(): void {
     const current = this.currentEmployee;
     if (current.estado !== 'ACTIVO') return;
@@ -132,6 +141,7 @@ export class HumanResourcesPageComponent {
     this.attendance = existing ? this.attendance.map((a) => a.id === existing.id ? record : a) : [record, ...this.attendance];
     this.notice = 'Entrada registrada a las ' + now.hora + '.';
   }
+  //Método para registrar la salida del trabajador
   protected registerExit(): void {
     const now = this.clock();
     const entry = this.attendance.find((a) => a.empleadoId === this.currentEmployee.id && a.fecha === now.fecha);
@@ -140,11 +150,13 @@ export class HumanResourcesPageComponent {
     this.attendance = this.attendance.map((a) => a.id === entry.id ? { ...a, salida: now.hora } : a);
     this.notice = 'Salida registrada a las ' + now.hora + '.';
   }
+  //Método para abrir el formulario de trabajador
   protected openEmployee(employee: Employee | null = null): void {
     if (this.currentRole !== 'GERENTE') return;
     this.editingEmployee = employee;
     this.formOpen = true;
   }
+  //Método para guardar un trabajador
   protected saveEmployee(value: Omit<Employee, 'id' | 'estado'>): void {
     if (this.currentRole !== 'GERENTE' || !this.formOpen) return;
     if (this.editingEmployee) this.employees = this.employees.map((e) => e.id === this.editingEmployee!.id ? { ...e, ...value } : e);
@@ -156,18 +168,21 @@ export class HumanResourcesPageComponent {
     this.formOpen = false;
     this.notice = 'Trabajador guardado correctamente.';
   }
+  //Método para desactivar un trabajador
   protected deactivate(): void {
     if (this.currentRole !== 'GERENTE' || !this.pendingDeactivation) return;
     this.employees = this.employees.map((e) => e.id === this.pendingDeactivation!.id ? { ...e, estado: 'INACTIVO' } : e);
     this.pendingDeactivation = null;
     this.notice = 'Trabajador desactivado. Su información e historial se conservan.';
   }
+  //Método para guardar el horario de un trabajador
   protected saveSchedule(days: readonly WorkDay[]): void {
     if (this.currentRole !== 'GERENTE' || !this.scheduleEmployee) return;
     this.schedules = { ...this.schedules, [this.scheduleEmployee.id]: days.map((day) => ({ ...day })) };
     this.scheduleEmployee = null;
     this.notice = 'Horario actualizado.';
   }
+  //Método para guardar un pago de salario
   protected savePayment(value: { empleadoId: number; periodo: string }): void {
     if (this.currentRole !== 'GERENTE' || !this.paymentOpen || !value.periodo.trim()) return;
     const employee = this.activeEmployees.find((e) => e.id === value.empleadoId);
@@ -179,6 +194,7 @@ export class HumanResourcesPageComponent {
     this.paymentOpen = false;
     this.notice = 'Pago de salario registrado correctamente.';
   }
+  //Método para mostrar el detalle de un pago
   protected openPaymentDetail(payment: SalaryPayment): void {
     this.selectedPayment = this.visiblePayments.find((p) => p.id === payment.id) ?? null;
   }

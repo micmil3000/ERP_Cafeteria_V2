@@ -1,8 +1,10 @@
-<app-modal class="confirm-dialog" [open]="open()" [title]="title()" (close)="cancel.emit()">
+<app-modal class="confirm-dialog" [open]="open()" [title]="title()" (close)="cancel.emit()"> <!-- Modal usado para confirmar una acción -->
   <div class="confirm-dialog__content">
+    <!-- Muestra el mensaje de confirmación -->
     <p class="confirm-dialog__message">{{ message() }}</p>
   </div>
   <div modal-footer class="confirm-dialog__actions">
+    <!-- Botón para cancelar la acción y cerrar el modal o para confirmar la acción -->
     <button type="button" class="confirm-dialog__button confirm-dialog__button--cancel" (click)="cancel.emit()">Cancelar</button>
     <button type="button" class="confirm-dialog__button confirm-dialog__button--confirm"
       [class.confirm-dialog__button--danger]="variant() === 'danger'" (click)="confirm.emit()">{{ confirmText() }}</button>

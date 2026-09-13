@@ -1,7 +1,9 @@
+<!-- Encabezado de la página -->
 <header class="page-header">
   <div class="page-header__content">
     <h2 class="page-header__title">{{ title() }}</h2>
-    @if (description()) {
+    <!-- Validar si existe una descripción para mostrarla -->
+    @if (description()) { 
       <p class="page-header__description">{{ description() }}</p>
     }
   </div>

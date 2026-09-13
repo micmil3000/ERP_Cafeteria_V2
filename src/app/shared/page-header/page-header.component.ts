@@ -7,6 +7,7 @@ import { Component, input } from '@angular/core';
   templateUrl: './page-header.component.html',
 })
 export class PageHeaderComponent {
+  //Define lo que el componente va a recibir como input, en este caso un titulo y una descripcion
   title = input.required<string>();
   description = input.required<string>();
 }

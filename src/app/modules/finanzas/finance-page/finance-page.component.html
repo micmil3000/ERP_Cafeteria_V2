@@ -1,8 +1,13 @@
+<!-- Sección de finanzas -->
 <section class="finance" aria-label="Contabilidad y Finanzas">
-  <app-page-header title="Finanzas" description="Consulta los ingresos, gastos y resultados financieros de Savia Café.">
+  <app-page-header 
+    title="Finanzas" 
+    description="Consulta los ingresos, gastos y resultados financieros de Savia Café."
+  >
     <button class="finance__button" type="button" (click)="expenseOpen = true; notice = ''">Registrar gasto</button>
   </app-page-header>
 
+  <!-- Muestra tarjetas del resumen financiero (gastos, ingresos y ganancia) -->
   <section class="finance__summary" aria-label="Resumen financiero en MXN">
     @for (stat of summary; track stat.label) {
       <app-stat-card [class]="'finance__stat finance__tone--' + stat.tone"
@@ -14,7 +19,9 @@
     }
   </section>
 
+  <!-- Sección de filtros -->
   <form class="finance__filters" aria-label="Filtrar movimientos" (submit)="$event.preventDefault()">
+    <!-- Contenedor de un filtro, con su label y respectivo input -->
     <div class="finance__filter-group">
       <label for="finance-from">Fecha desde</label>
       <input class="finance__control" id="finance-from" name="desde" type="date" [(ngModel)]="filters.desde"
@@ -35,24 +42,38 @@
       <label for="finance-category">Categoría</label>
       <select class="finance__control" id="finance-category" name="categoria" [(ngModel)]="filters.categoria">
         <option value="">Todas</option>
-        @for (category of categories; track category) { <option [value]="category">{{ category }}</option> }
+        <!-- Iteración para categorías disponibles -->
+        @for (category of categories; track category) { 
+          <option [value]="category">{{ category }}</option> 
+        }
       </select>
     </div>
     <div class="finance__filter-group">
       <label for="finance-origin">Origen</label>
       <select class="finance__control" id="finance-origin" name="origen" [(ngModel)]="filters.origen">
         <option value="">Todos</option>
-        @for (origin of origins; track origin) { <option [value]="origin">{{ origin }}</option> }
+        <!-- Iteración para origenes de gasto disponibles -->
+        @for (origin of origins; track origin) { 
+          <option [value]="origin">{{ origin }}</option> 
+        }
       </select>
     </div>
+    <!-- Botón para limpiar filtros que al darle click realiza el método clearFilters -->
     <button class="finance__button finance__button--secondary" type="button" (click)="clearFilters()">Limpiar filtros</button>
-    <p class="finance__filter-error" id="finance-date-error" aria-live="polite">@if (invalidDates) { La fecha desde no puede ser posterior a la fecha hasta. }</p>
+    <p class="finance__filter-error" id="finance-date-error" aria-live="polite">
+      <!-- Mensaje en caso de fechas inválidas -->
+      @if (invalidDates) { 
+        La fecha desde no puede ser posterior a la fecha hasta. 
+      }
+    </p>
   </form>
 
+  <!-- Gráficas de finanzas -->
   <section class="finance__charts" aria-label="Gráficas financieras en MXN">
     <article class="finance__chart">
       <h2 class="finance__chart-title">Ingresos vs Gastos</h2>
       <ul class="finance__comparison">
+        <!-- Crea dinámicante una gráfica de barras simple con css -->
         @for (bar of comparison; track bar.label) {
           <li [class]="'finance__column finance__tone--' + bar.tone">
             <span class="finance__chart-value">{{ money(bar.total) }}</span>
@@ -67,34 +88,42 @@
     <article class="finance__chart">
       <h2 class="finance__chart-title">Gastos por categoría</h2>
       <ul class="finance__category-list">
+        <!-- Crea gráfica para cada tipo/categoría de gasto para comparar sus valores -->
         @for (category of categoryExpenses; track category.label) {
           <li [class]="'finance__category finance__tone--' + category.tone">
             <p class="finance__category-label"><span>{{ category.label }}</span><strong>{{ money(category.total) }}</strong></p>
             <div class="finance__bar-track" aria-hidden="true"><span class="finance__bar" [style.width.%]="category.percentage"></span></div>
           </li>
-        } @empty {
+        } 
+        <!-- Mensaje a mostrar en caso de que no haya gastos -->
+        @empty {
           <li class="finance__empty">No hay gastos para los filtros seleccionados.</li>
         }
       </ul>
     </article>
   </section>
 
+  <!-- Historial de movimientos financieros -->
   <section class="finance__movement-history" aria-labelledby="finance-history-title">
+    <!-- Encabezado de la sección -->
     <header class="finance__history-header">
       <h2 class="finance__chart-title" id="finance-history-title">Historial de movimientos</h2>
       <span class="finance__history-count">{{ filteredMovements.length }} movimientos · MXN</span>
     </header>
+    <!-- Muestra mensaje de gasto registrado según el caso  -->
     <p class="finance__notice" role="status">{{ notice }}</p>
     <app-data-table label="Historial de movimientos financieros" [empty]="filteredMovements.length === 0"
       emptyMessage="No hay movimientos que coincidan con los filtros." [columnCount]="9">
       <thead class="data-table__head">
         <tr class="data-table__row">
+          <!-- Agrega encabezados a la tabla -->
           @for (heading of ['Fecha', 'Concepto', 'Categoría', 'Tipo', 'Origen', 'Subtotal', 'IVA', 'Total', 'Acción']; track heading) {
             <th class="data-table__header" scope="col">{{ heading }}</th>
           }
         </tr>
       </thead>
       <tbody class="data-table__body">
+        <!-- Iteración para agregar registros a la tabla -->
         @for (movement of filteredMovements; track movement.id) {
           <tr class="data-table__row">
             <td class="data-table__cell finance__nowrap">{{ date(movement.fecha) }}</td>
@@ -116,12 +145,14 @@
   </section>
 </section>
 
+<!-- Modal de registrar gasto -->
 @if (expenseOpen) {
   <app-modal [open]="true" title="Registrar gasto" (close)="expenseOpen = false">
     <app-expense-form (save)="saveExpense($event)" (cancel)="expenseOpen = false" />
   </app-modal>
 }
 
+<!-- Modal para mostrar dmovimiento financiero -->
 @if (selectedMovement; as movement) {
   <app-modal [open]="true" title="Detalle de movimiento" (close)="selectedMovement = null">
     <section class="finance__detail" aria-label="Movimiento de solo lectura">

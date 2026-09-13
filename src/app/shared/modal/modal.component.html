@@ -1,6 +1,9 @@
+<!-- Modal -->
 <dialog #dialog class="modal" [attr.aria-label]="title() || 'Diálogo'" aria-modal="true"
   (cancel)="requestClose($event)">
+  <!-- Contenedor del modal -->
   <div class="modal__container">
+    <!-- Encabezado del modal, con el título y el botón de cierre -->
     <header class="modal__header">
       <h2 class="modal__title">{{ title() }}</h2>
       <button class="modal__close" type="button" aria-label="Cerrar diálogo" (click)="requestClose()">
@@ -9,7 +12,9 @@
         </svg>
       </button>
     </header>
+    <!-- Contenido del modal cargado dinámicamente -->
     <div class="modal__body"><ng-content /></div>
+    <!-- Pie de página del modal, con contenido reci -->
     <footer class="modal__footer"><ng-content select="[modal-footer]" /></footer>
   </div>
 </dialog>

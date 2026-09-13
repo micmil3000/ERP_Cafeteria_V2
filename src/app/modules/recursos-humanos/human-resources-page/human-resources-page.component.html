@@ -1,4 +1,5 @@
 <section class="human-resources" aria-label="Recursos Humanos">
+  <!-- Encabezado y acciones según el rol -->
   <app-page-header title="Recursos Humanos" [description]="currentRole === 'GERENTE' ? 'Gestiona al personal, horarios, asistencia y pagos de Savia Café.' : 'Consulta tu información, horario, asistencia y pagos en Savia Café.'">
     @if (currentRole === 'GERENTE' && activeTab === 'people') {
       <button class="human-resources__button" type="button" (click)="openEmployee()">Registrar trabajador</button>
@@ -10,9 +11,11 @@
   <app-tabs [tabs]="tabs" [activeTab]="activeTab" (tabChange)="activeTab = $event" />
   <p class="human-resources__notice" role="status">{{ notice }}</p>
 
+  <!-- Sección de información de trabajadores -->
   @if (activeTab === 'people') {
     @if (currentRole === 'GERENTE') {
       <section class="human-resources__section" aria-label="Trabajadores">
+        <!-- Tabla de trabajadores -->
         <app-data-table label="Trabajadores de Savia Café" [empty]="employees.length === 0" [columnCount]="8">
           <thead class="data-table__head"><tr>
             @for (heading of ['Trabajador', 'Correo', 'Teléfono', 'Fecha contratación', 'Salario', 'Horario', 'Estado', 'Acciones']; track heading) {
@@ -20,6 +23,7 @@
             }
           </tr></thead>
           <tbody class="data-table__body">
+            <!-- Iteración para mostrar los trabajadores -->
             @for (employee of employees; track employee.id) {
               <tr class="data-table__row">
                 <td class="data-table__cell"><strong>{{ name(employee) }}</strong><small class="human-resources__role">{{ employee.id === 1 ? 'Gerente' : 'Trabajador' }}</small></td>
@@ -39,6 +43,7 @@
         </app-data-table>
       </section>
     } @else {
+      <!-- Información y horario del trabajador actual -->
       <section class="human-resources__personal" aria-label="Mi información">
         <article class="human-resources__profile">
           <header><p class="human-resources__eyebrow">Tu espacio en Savia</p><h2 class="human-resources__title">{{ name(currentEmployee) }}</h2></header>
@@ -63,6 +68,7 @@
     }
   }
 
+  <!-- Sección de asistencia -->
   @if (activeTab === 'attendance') {
     <section class="human-resources__attendance" aria-label="Asistencia">
       <article class="human-resources__attendance-card">
@@ -81,6 +87,7 @@
         </div>
       </article>
       <h2 class="human-resources__title">{{ currentRole === 'GERENTE' ? 'Historial de asistencia' : 'Mi historial reciente' }}</h2>
+      <!-- Tabla del historial de asistencia -->
       <app-data-table label="Historial de asistencia" [empty]="visibleAttendance.length === 0" [columnCount]="currentRole === 'GERENTE' ? 5 : 4">
         <thead class="data-table__head"><tr>
           @if (currentRole === 'GERENTE') { <th class="data-table__header" scope="col">Trabajador</th> }
@@ -99,6 +106,7 @@
     </section>
   }
 
+  <!-- Sección de pagos de salario -->
   @if (activeTab === 'payments') {
     <section class="human-resources__payments" aria-label="Pagos de salario">
       <app-data-table label="Historial de pagos de salario" [empty]="visiblePayments.length === 0" [columnCount]="currentRole === 'GERENTE' ? 6 : 4">
@@ -123,6 +131,7 @@
   }
 </section>
 
+<!-- Modales para administrar trabajadores, horarios y pagos -->
 @if (currentRole === 'GERENTE') {
   @if (formOpen) {
     <app-modal [open]="true" [title]="editingEmployee ? 'Editar trabajador' : 'Registrar trabajador'" (close)="formOpen = false">
@@ -144,6 +153,7 @@
     </app-modal>
   }
 }
+<!-- Modal para mostrar el comprobante de pago -->
 @if (selectedPayment; as payment) {
   <app-modal [open]="true" title="Comprobante de pago" (close)="selectedPayment = null">
     <dl class="human-resources__details">

@@ -1,4 +1,6 @@
+<!-- Formulario para crear o editar un proveedor -->
 <form class="provider-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+  <!-- Campos del formulario agrupando label, input y mensaje de error -->
   <div class="provider-form__field">
     <label class="provider-form__label" for="provider-name">Nombre</label>
     <input class="provider-form__input" id="provider-name" type="text" formControlName="nombre" required [attr.aria-invalid]="invalid('nombre')" aria-describedby="provider-name-error" />
@@ -24,6 +26,7 @@
     <textarea class="provider-form__input" id="provider-address" rows="2" formControlName="direccion" required [attr.aria-invalid]="invalid('direccion')" aria-describedby="provider-address-error"></textarea>
     <span class="provider-form__error" id="provider-address-error">@if (invalid('direccion')) { Escribe la dirección. }</span>
   </div>
+  <!-- Acciones del formulario, ya sea cancelar o enviar -->
   <footer class="provider-form__actions">
     <button class="provider-form__button provider-form__button--secondary" type="button" (click)="cancel.emit()">Cancelar</button>
     <button class="provider-form__button" type="submit">{{ mode() === 'CREATE' ? 'Registrar proveedor' : 'Guardar cambios' }}</button>

@@ -1,5 +1,5 @@
-:host { 
-	display: block; 
+:host {
+	display: block;
 }
 
 header {
@@ -12,12 +12,14 @@ header {
 	background: var(--color-background);
 }
 
-.user { 
+/* INFO DEL USUARIO */
+
+.user {
 	justify-self: end;
-	display: flex; 
-	align-items: center; 
-	gap: 12px; 
-	flex-shrink: 0; 
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex-shrink: 0;
 }
 
 .avatar {
@@ -32,38 +34,40 @@ header {
 	font-weight: 700;
 }
 
-.user-details { 
-	display: flex; 
-	flex-direction: column; 
+.user-details {
+	display: flex;
+	flex-direction: column;
 }
 
-.name { 
-	font-size: 14px; 
-	font-weight: 600; 
+.name {
+	font-size: 14px;
+	font-weight: 600;
 }
 
-.role { 
-	font-size: 12px; 
-	color: var(--color-text-secondary); 
+.role {
+	font-size: 12px;
+	color: var(--color-text-secondary);
 }
 
-@media (max-width: 1179px) { 
-	header { 
-		padding-inline: 24px; 
-	} 
+/* ADAPTACIÓN PANTALLAS MEDIANAS */
+@media (max-width: 1179px) {
+	header {
+		padding-inline: 24px;
+	}
 }
 
+/* ADAPTACIÓN PANTALLAS PEQUEÑAS */
 @media (max-width: 600px) {
-	header { 
-		padding-inline: 16px; 
-		gap: 12px; 
+	header {
+		padding-inline: 16px;
+		gap: 12px;
 	}
 
-	h1 { 
-		font-size: 18px; 
+	h1 {
+		font-size: 18px;
 	}
 
-	.user-details { 
-		display: none; 
+	.user-details {
+		display: none;
 	}
 }

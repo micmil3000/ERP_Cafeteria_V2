@@ -1,3 +1,4 @@
+<!-- Resumen de la venta que se va a facturar -->
 <section class="invoice-form__summary" aria-label="Resumen de la venta">
   <h3 class="invoice-form__title">Venta #{{ sale().id }}</h3>
   <p class="invoice-form__note">XML simulado para la práctica, sin validez fiscal.</p>
@@ -7,6 +8,7 @@
     <div class="invoice-form__row"><dt>Total</dt><dd><strong>{{ money(sale().total) }}</strong></dd></div>
   </dl>
 </section>
+<!-- Formulario para ingresar los datos fiscales -->
 <form class="invoice-form" [formGroup]="form" (ngSubmit)="submit()" novalidate>
         <div class="invoice-form__field">
           <label for="invoice-rfc">RFC</label>
@@ -33,6 +35,7 @@
           <input class="invoice-form__input" id="invoice-use" type="text" formControlName="uso" required [attr.aria-invalid]="invalid('uso')" aria-describedby="invoice-use-error" />
           <span class="invoice-form__error" id="invoice-use-error">@if (invalid('uso')) { Escribe el uso de factura. }</span>
         </div>
+        <!-- Botones del formulario -->
         <footer class="invoice-form__actions">
           <button class="invoice-form__button invoice-form__button--secondary" type="button" (click)="cancel.emit()">Cancelar</button>
           <button class="invoice-form__button" type="submit">Generar XML</button>

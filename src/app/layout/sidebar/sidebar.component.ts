@@ -9,23 +9,10 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 })
 export class SidebarComponent {
 	readonly closeSidebar = output<void>();
-
+	//Rol actual del usuario. Para pruebas.
 	protected readonly currentRole: 'GERENTE' | 'TRABAJADOR' = 'GERENTE';
 
-	protected get roleLabel(): string {
-		return this.currentRole === 'GERENTE' ? 'Gerente' : 'Trabajador';
-	}
-
-	protected get visibleNavigation() {
-		return this.currentRole === 'GERENTE'
-			? this.navigation
-			: this.navigation.filter(
-				(item) =>
-					item.label !== 'Finanzas' &&
-					item.label !== 'Compras y Proveedores'
-			);
-	}
-
+	//Todas las opciones de navegación disponibles en la aplicación. Incluye label, ruta a donde te lleva y el icono que aparece. 
 	protected readonly navigation = [
 		{
 			label: 'Inicio',
@@ -58,4 +45,20 @@ export class SidebarComponent {
 			icon: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0 M17 3a4 4 0 0 1 0 8 M22 21v-2a4 4 0 0 0-3-3.87'
 		},
 	];
+
+	//Devuelve el label del rol actual del usuario.
+	protected get roleLabel(): string {
+		return this.currentRole === 'GERENTE' ? 'Gerente' : 'Trabajador';
+	}
+
+	//Filtra las opciones de navegación según el rol del usuario. Gerente = todos, Trabajador = sin Finanzas ni Compras y Proveedores.
+	protected get visibleNavigation() {
+		return this.currentRole === 'GERENTE'
+			? this.navigation
+			: this.navigation.filter(
+				(item) =>
+					item.label !== 'Finanzas' &&
+					item.label !== 'Compras y Proveedores'
+			);
+	}
 }

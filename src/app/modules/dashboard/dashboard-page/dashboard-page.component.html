@@ -1,4 +1,6 @@
+<!-- Sección Dashboard / Inicio -->
 <section class="dashboard" aria-label="Resumen de inicio">
+  <!-- Encabezado de la página con bienvenida personalizada según el rol -->
   <header class="dashboard__welcome">
     <span class="dashboard__welcome-icon" aria-hidden="true">
       <svg class="dashboard__icon" viewBox="0 0 24 24">
@@ -10,9 +12,11 @@
       [description]="welcomeDescription"
     />
   </header>
-
+  <!-- Sección de estadísticas del negocio -->
   <section class="dashboard__stats" aria-label="Estadísticas principales">
+    <!-- Iteración para mostrar todas las stats obtenidas -->
     @for (stat of visibleStats; track stat.label; let index = $index) {
+      <!-- Cambia el color dependiendo de la posición de la estadística -->
       <app-stat-card class="dashboard__stat" [label]="stat.label" [value]="stat.value" [detail]="stat.detail"
         [class.dashboard__stat--cinnamon]="index === 1"
         [class.dashboard__stat--terracotta]="index === 2">
@@ -27,11 +31,14 @@
     }
   </section>
 
+  <!-- Sección de acciones rápidas -->
   <section class="dashboard__quick-actions" aria-labelledby="dashboard-actions-title">
     <header class="dashboard__section-header">
       <h2 class="dashboard__section-title" id="dashboard-actions-title">Acciones rápidas</h2>
     </header>
+    <!-- Muestra las acciones rápidas disponibles dependiendo del usuario -->
     <ul class="dashboard__actions-list" [class.dashboard__actions-list--worker]="currentRole === 'TRABAJADOR'">
+      <!-- Iteración para crear dinámicamente los accesos rápidos -->
       @for (action of visibleActions; track action.label; let index = $index) {
         <li class="dashboard__action-item">
           <button class="dashboard__action" type="button"
@@ -49,12 +56,14 @@
     </ul>
   </section>
 
+  <!-- Agregar sección de alertas únicamente para el usuario gerente -->
   @if (currentRole === 'GERENTE') {
   <section class="dashboard__alerts" aria-labelledby="dashboard-alerts-title">
     <header class="dashboard__section-header">
       <h2 class="dashboard__section-title" id="dashboard-alerts-title">Alertas</h2>
     </header>
     <ul class="dashboard__alerts-list">
+      <!-- Iteración para mostrar las alertas obtenidas -->
       @for (alert of alerts; track alert.text; let index = $index) {
         <li class="dashboard__alert" [class.dashboard__alert--terracotta]="index === 1">
           <svg class="dashboard__icon dashboard__alert-icon" viewBox="0 0 24 24" aria-hidden="true">

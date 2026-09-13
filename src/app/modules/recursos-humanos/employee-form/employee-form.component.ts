@@ -9,9 +9,11 @@ import type { Employee } from '../human-resources-page/human-resources-page.comp
   templateUrl: './employee-form.component.html',
 })
 export class EmployeeFormComponent implements OnInit {
+  //Variables para recibir y enviar los datos del trabajador
   readonly employee = input<Employee | null>(null);
   readonly save = output<Omit<Employee, 'id' | 'estado'>>();
   readonly cancel = output<void>();
+  //Campos que se muestran en el formulario
   protected readonly fields = [
     { key: 'nombre', label: 'Nombre', type: 'text', error: 'Escribe el nombre.' },
     { key: 'apellidos', label: 'Apellidos', type: 'text', error: 'Escribe los apellidos.' },
@@ -19,6 +21,7 @@ export class EmployeeFormComponent implements OnInit {
     { key: 'correo', label: 'Correo', type: 'email', error: 'Escribe un correo válido.' },
     { key: 'fechaContratacion', label: 'Fecha de contratación', type: 'date', error: 'Selecciona la fecha de contratación.' },
   ] as const;
+  //Formulario con validaciones del trabajador
   protected readonly form = new FormGroup({
     nombre: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
     apellidos: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
@@ -27,8 +30,11 @@ export class EmployeeFormComponent implements OnInit {
     fechaContratacion: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
     salario: new FormControl<number | null>(null, [Validators.required, Validators.min(0.01), Validators.max(1000000), Validators.pattern(/^\d+(\.\d{1,2})?$/)]),
   });
+  //Carga los datos cuando se edita un trabajador
   ngOnInit(): void { const e = this.employee(); if (e) this.form.patchValue(e); }
+  //Método para identificar campos inválidos
   protected invalid(key: keyof typeof this.form.controls): boolean { return this.form.controls[key].touched && this.form.controls[key].invalid; }
+  //Método para guardar el trabajador
   protected submit(): void {
     this.form.markAllAsTouched();
     if (this.form.invalid) return;

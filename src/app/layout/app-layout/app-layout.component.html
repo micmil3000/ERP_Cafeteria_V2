@@ -1,16 +1,20 @@
+<!-- Contenedor principal de la aplicación. Contiene el sidebar, header y el contenido principal. -->
 <div
 	class="app-layout"
 	[class.app-layout--sidebar-closed]="!sidebarOpen"
 >
+
+	<!-- Sidebar de la aplicación. Contiene el menú lateral. -->
 	<app-sidebar
 		class="app-layout__sidebar"
 		[class.app-layout__sidebar--hidden]="!sidebarOpen"
 		(closeSidebar)="closeSidebar()"
 	/>
 
+	<!-- Área principal de la aplicación. Contiene el header y el contenido principal. -->
 	<section class="app-layout__content">
 		<header class="app-layout__header">
-			@if (!sidebarOpen) {
+			@if (!sidebarOpen) { //Revisa si el sidebar está cerrado para mostrar el botón de abrirlo
 				<button
 					class="app-layout__open-sidebar"
 					type="button"
@@ -27,6 +31,7 @@
 			<app-app-header />
 		</header>
 
+		<!-- Contenido principal de la aplicación. Aquí se renderizan las vistas de las rutas. -->
 		<main class="app-layout__main">
 			<router-outlet />
 		</main>

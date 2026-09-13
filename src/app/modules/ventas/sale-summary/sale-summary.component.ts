@@ -8,6 +8,7 @@ import type { CartItem } from '../sales-page/sales-page.component';
   templateUrl: './sale-summary.component.html',
 })
 export class SaleSummaryComponent {
+  //Variables para recibir el resumen y controlar el carrito
   readonly items = input.required<readonly CartItem[]>();
   readonly subtotal = input.required<number>();
   readonly iva = input.required<number>();
@@ -19,6 +20,7 @@ export class SaleSummaryComponent {
   readonly checkout = output<void>();
   readonly cancel = output<void>();
 
+  //Devuelve valor de dinero en moneda mexicana
   protected money(value: number): string {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
   }

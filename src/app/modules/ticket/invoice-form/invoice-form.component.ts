@@ -9,9 +9,11 @@ import type { Sale } from '../../ventas/sales-page/sales-page.component';
   templateUrl: './invoice-form.component.html',
 })
 export class InvoiceFormComponent {
+  //Variables para recibir la venta y controlar las acciones
   readonly sale = input.required<Sale>();
   readonly save = output<Omit<NonNullable<Sale['factura']>, 'xml'>>();
   readonly cancel = output<void>();
+  //Formulario con los datos fiscales y sus validaciones
   protected readonly form = new FormGroup({
     rfc: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
     nombre: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
@@ -21,15 +23,18 @@ export class InvoiceFormComponent {
   });
 
 
+  //Método para identificar campos inválidos
   protected invalid(field: keyof typeof this.form.controls): boolean {
     const control = this.form.controls[field];
     return control.touched && control.invalid;
   }
 
+  //Devuelve valor de dinero en moneda mexicana
   protected money(value: number): string {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
   }
 
+  //Método para enviar los datos de la factura
   protected submit(): void {
     this.form.markAllAsTouched();
     if (this.form.invalid || this.sale().factura) return;

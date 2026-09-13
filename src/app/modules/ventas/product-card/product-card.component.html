@@ -1,4 +1,5 @@
 <article class="product-card" [class.product-card--sold-out]="product().stock === 0">
+	<!-- Imagen o ilustración del producto -->
 	<div
 		class="product-card__image-wrapper"
 		[class.product-card__image-wrapper--warm]="
@@ -53,6 +54,7 @@
 		</span>
 	</div>
 
+	<!-- Información y acción del producto -->
 	<div class="product-card__body">
 		<p class="product-card__category">
 			{{ product().categoria }}

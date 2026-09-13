@@ -1,5 +1,6 @@
 <section class="ticket" aria-label="Comprobante de venta">
   @if (sale; as currentSale) {
+    <!-- Comprobante de la venta -->
     <article class="ticket__receipt" aria-labelledby="ticket-brand">
       <header class="ticket__brand">
         <span class="ticket__logo" aria-hidden="true">
@@ -12,6 +13,7 @@
         <p class="ticket__sale-number">Venta #{{ currentSale.id }}</p>
       </header>
 
+      <!-- Datos generales de la venta -->
       <dl class="ticket__meta">
         <div class="ticket__meta-row"><dt>Fecha</dt><dd><time [attr.datetime]="currentSale.fechaHora">{{ date(currentSale.fechaHora) }}</time></dd></div>
         <div class="ticket__meta-row"><dt>Hora</dt><dd>{{ time(currentSale.fechaHora) }}</dd></div>
@@ -20,6 +22,7 @@
         @if (currentSale.referencia) { <div class="ticket__meta-row"><dt>Referencia</dt><dd>{{ currentSale.referencia }}</dd></div> }
       </dl>
 
+      <!-- Iteración para mostrar los productos comprados -->
       <section class="ticket__products" aria-labelledby="ticket-products-title">
         <h2 class="ticket__section-title" id="ticket-products-title">Tu pedido</h2>
         <ul class="ticket__items">
@@ -32,6 +35,7 @@
         </ul>
       </section>
 
+      <!-- Totales de la venta -->
       <dl class="ticket__totals">
         <div class="ticket__total-row"><dt>Subtotal</dt><dd>{{ money(currentSale.subtotal) }}</dd></div>
         <div class="ticket__total-row"><dt>IVA 16%</dt><dd>{{ money(currentSale.iva) }}</dd></div>
@@ -49,6 +53,7 @@
       </footer>
     </article>
     <p class="ticket__notice" role="status">{{ notice }}</p>
+    <!-- Acciones del comprobante -->
     <nav class="ticket__actions" aria-label="Acciones del comprobante">
       <button class="ticket__button" type="button" (click)="finish()">Finalizar</button>
       @if (!currentSale.factura) {
@@ -58,12 +63,14 @@
       }
     </nav>
 
+    <!-- Modal para generar la factura -->
     @if (invoiceOpen && !currentSale.factura) {
       <app-modal [open]="true" title="Generar factura" (close)="invoiceOpen = false">
         <app-invoice-form class="component" [sale]="currentSale" (save)="generateInvoice($event)" (cancel)="invoiceOpen = false" />
       </app-modal>
     }
   } @else {
+    <!-- Mensaje cuando no existe una venta -->
     <article class="ticket__empty">
       <h1 class="ticket__section-title">No hay una venta disponible para mostrar.</h1>
       <button class="ticket__button" type="button" (click)="finish()">Volver a ventas</button>

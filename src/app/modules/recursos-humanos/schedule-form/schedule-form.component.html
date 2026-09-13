@@ -1,4 +1,5 @@
 <form class="schedule-form" #form="ngForm" (ngSubmit)="submit(form)" novalidate>
+  <!-- Iteración para mostrar los días del horario -->
   @for (day of days; track day.dia) {
     <fieldset class="schedule-form__day">
       <legend class="schedule-form__label">{{ names[day.dia] }}</legend>
@@ -14,6 +15,7 @@
       <span class="schedule-form__error" [id]="'schedule-error-' + day.dia">@if (submitted && invalid(day)) { Indica entrada y salida; la salida debe ser posterior a la entrada. }</span>
     </fieldset>
   }
+  <!-- Botones para cancelar o guardar el horario -->
   <footer class="schedule-form__actions">
     <button class="schedule-form__button schedule-form__button--secondary" type="button" (click)="cancel.emit()">Cancelar</button>
     <button class="schedule-form__button" type="submit">Guardar horario</button>

@@ -9,12 +9,14 @@ import { LoginFormComponent } from '../login-form/login-form.component';
   templateUrl: './login-page.component.html',
 })
 export class LoginPageComponent {
+  //Variables para controlar la navegación, usuarios y errores
   private readonly router = inject(Router);
   private readonly users = [
     { correo: 'gerente@savia.com', password: '1234' },
     { correo: 'trabajador@savia.com', password: '1234' },
   ];
   protected error = '';
+  //Método para validar los datos e iniciar sesión
   protected login(credentials: { correo: string; password: string }): void {
     if (this.users.some((u) => u.correo === credentials.correo.trim().toLowerCase() && u.password === credentials.password)) {
       this.error = '';

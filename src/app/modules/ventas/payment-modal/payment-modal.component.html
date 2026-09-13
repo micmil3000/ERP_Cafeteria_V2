@@ -1,16 +1,20 @@
+<!-- Modal para confirmar el cobro -->
 <app-modal [open]="true" title="Resumen del cobro" (close)="close.emit()">
   <form class="payment" (ngSubmit)="submit()">
+    <!-- Resumen de totales -->
     <dl class="payment__summary">
       <div class="payment__row"><dt>Subtotal</dt><dd>{{ money(subtotal()) }}</dd></div>
       <div class="payment__row"><dt>IVA 16%</dt><dd>{{ money(iva()) }}</dd></div>
       <div class="payment__row payment__row--total"><dt>Total</dt><dd>{{ money(total()) }}</dd></div>
     </dl>
+    <!-- Selección del método de pago -->
     <div class="payment__field">
       <label for="payment-method">Método de pago</label>
       <select class="payment__select" id="payment-method" name="method" [(ngModel)]="method">
         <option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option>
       </select>
     </div>
+    <!-- Simulación del resultado del pago -->
     <fieldset class="payment__simulation">
       <legend>Simulación de pago</legend>
       <div class="payment__field">
@@ -22,6 +26,7 @@
     </fieldset>
     @if (rejected) { <p class="payment__status" role="alert">Pago rechazado. No se registró la venta. Puedes cambiar el resultado e intentar de nuevo.</p> }
     @if (error()) { <p class="payment__status" role="alert">{{ error() }}</p> }
+    <!-- Botones para cancelar o confirmar el pago -->
     <footer class="payment__actions">
       <button class="payment__button payment__button--secondary" type="button" (click)="close.emit()">Cancelar</button>
       <button class="payment__button" type="submit">Confirmar pago simulado</button>

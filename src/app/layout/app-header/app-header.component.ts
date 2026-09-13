@@ -10,5 +10,5 @@ import { filter, map } from 'rxjs';
   templateUrl: './app-header.component.html',
 })
 export class AppHeaderComponent {
-  
+  //Componente para la parte superior de la aplicación. Contiene información del usuario.
 }

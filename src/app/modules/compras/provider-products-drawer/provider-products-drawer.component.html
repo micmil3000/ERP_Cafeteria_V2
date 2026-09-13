@@ -1,11 +1,18 @@
+<!-- Modal para formulario de gestión de productos del proveedor -->
 <dialog #dialog class="provider-products" aria-labelledby="provider-products-title" aria-modal="true" (cancel)="requestClose($event)">
+  <!-- Encabezado para mostrar el proveedor seleccionado a gestionar y botón para cerrar -->
   <header class="provider-products__header">
-    <div><p class="provider-products__eyebrow">Productos del proveedor</p><h2 class="provider-products__title" id="provider-products-title">{{ provider().nombre }}</h2></div>
+    <div>
+      <p class="provider-products__eyebrow">Productos del proveedor</p>
+      <h2 class="provider-products__title" id="provider-products-title">{{ provider().nombre }}</h2>
+    </div>
     <button class="provider-products__close" type="button" aria-label="Cerrar productos del proveedor" (click)="requestClose()">×</button>
   </header>
+  <!-- Contenedor de los productos asociados del proveedor -->
   <div class="provider-products__body">
     <p class="provider-products__note">Precios de compra vigentes en MXN, antes de IVA.</p>
     <ul class="provider-products__list">
+      <!-- Iteración para mostrar todos los productos asociados con su formulario para ajustar precio -->
       @for (item of associatedProducts; track item.productoId) {
         <li class="provider-products__item">
           <h3 class="provider-products__name">{{ item.nombre }}</h3>
@@ -20,31 +27,54 @@
             <button class="provider-products__remove" type="button" (click)="remove(item.productoId)" [attr.aria-label]="'Retirar asociación de ' + item.nombre">Retirar</button>
           </form>
         </li>
-      } @empty { <li class="provider-products__empty">Este proveedor aún no tiene productos asociados.</li> }
+      } 
+      <!-- Mensaje que se muestra en caso que el proveedor no tenga productos asociados -->
+      @empty { 
+        <li class="provider-products__empty">Este proveedor aún no tiene productos asociados.</li>
+      }
     </ul>
     <p class="provider-products__status" role="status">{{ notice }}</p>
+    <!-- Sección para agregar productos asociados -->
     <section class="provider-products__association" aria-labelledby="provider-products-add-title">
       <h3 class="provider-products__name" id="provider-products-add-title">Asociar producto</h3>
       @if (availableProducts.length) {
         <form class="provider-products__form" [formGroup]="form" (ngSubmit)="add()" novalidate>
           <div class="provider-products__field">
             <label for="association-product">Producto</label>
+            <!-- Para seleccionar un nuevo producto para asociar de los que no tenga asociados -->
             <select class="provider-products__input" id="association-product" formControlName="productoId" required
               [attr.aria-invalid]="invalid('productoId')" aria-describedby="association-product-error">
               <option [ngValue]="null">Selecciona un producto</option>
-              @for (product of availableProducts; track product.id) { <option [ngValue]="product.id">{{ product.nombre }}</option> }
+              <!-- Agregar todas los productos disponibles al select -->
+              @for (product of availableProducts; track product.id) { 
+                <option [ngValue]="product.id">{{ product.nombre }}</option> 
+              }
             </select>
-            <span class="provider-products__error" id="association-product-error">@if (invalid('productoId')) { Selecciona un producto. }</span>
+            <!-- Mensaje de error en caso no se haya seleccionado un producto -->
+            <span class="provider-products__error" id="association-product-error">
+              @if (invalid('productoId')) { 
+                Selecciona un producto. 
+              }
+            </span>
           </div>
+          <!-- Espacio para asginar un precio de compra al producto y mensaje en caso de que el valor sea inválido -->
           <div class="provider-products__field">
             <label for="association-new-price">Precio de compra (MXN)</label>
             <input class="provider-products__input" id="association-new-price" type="number" min="0.01" max="1000000" step="0.01" formControlName="precioCompra" required
               [attr.aria-invalid]="invalid('precioCompra')" aria-describedby="association-price-error" />
-            <span class="provider-products__error" id="association-price-error">@if (invalid('precioCompra')) { Usa un precio mayor que cero, hasta un millón y con máximo dos decimales. }</span>
+            <span class="provider-products__error" id="association-price-error">
+              @if (invalid('precioCompra')) { 
+                Usa un precio mayor que cero, hasta un millón y con máximo dos decimales. 
+              }
+            </span>
           </div>
           <button class="provider-products__button" type="submit">Asociar producto</button>
         </form>
-      } @else { <p class="provider-products__note">Todos los productos del catálogo están asociados.</p> }
+      } 
+      <!-- Mensaje a mostrar en caso que el proveedor ya tiene asociados todos los productos -->
+      @else { 
+        <p class="provider-products__note">Todos los productos del catálogo están asociados.</p> 
+      }
     </section>
   </div>
 </dialog>
