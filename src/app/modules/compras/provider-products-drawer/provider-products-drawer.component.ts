@@ -1,6 +1,8 @@
 import { afterNextRender, Component, ElementRef, input, output, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import type { Provider, Product, ProviderProduct } from '../purchases-page/purchases-page.component';
+import { Proveedor } from '../../../models/proveedor.model';
+import { Producto } from '../../../models/producto.model';
+import { ProductoProveedorDetalle } from '../../../services/proveedor.service';
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -12,9 +14,9 @@ import type { Provider, Product, ProviderProduct } from '../purchases-page/purch
 //Componente reutilizable para gestionar los productos relacionados a un proveedor en específico
 export class ProviderProductsDrawerComponent {
   //Datos que recibe el componente: proveedor, productos disponibles y asociaciones existentes
-  readonly provider = input.required<Provider>();
-  readonly products = input.required<readonly Product[]>();
-  readonly associations = input.required<readonly ProviderProduct[]>();
+  readonly provider = input.required<Proveedor>();
+  readonly products = input.required<readonly Producto[]>();
+  readonly associations = input.required<readonly ProductoProveedorDetalle[]>();
   //Eventos que emite el componente: cerrar, agregar nuevo producto a ese proveedor, actualiza precio, eliminar producto de ese proveedor
   readonly close = output<void>();
   readonly addAssociation = output<{ productoId: number; precioCompra: number }>();

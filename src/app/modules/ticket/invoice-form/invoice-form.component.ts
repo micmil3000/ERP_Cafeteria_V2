@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import type { Sale } from '../../ventas/sales-page/sales-page.component';
+import { VentaVista as Sale } from '../../../models/venta.model';
 
 @Component({
   imports: [ReactiveFormsModule],

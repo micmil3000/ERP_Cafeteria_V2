@@ -4,7 +4,8 @@ import { Router } from '@angular/router';
 import { ModalComponent } from '../../../shared/modal/modal.component';
 import { BadgeComponent } from '../../../shared/badge/badge.component';
 import { InvoiceFormComponent } from '../invoice-form/invoice-form.component';
-import type { Sale, SalesNavigationState } from '../../ventas/sales-page/sales-page.component';
+import { EstadoNavegacionVentas as SalesNavigationState, VentaVista as Sale } from '../../../models/venta.model';
+import { FacturaService } from '../../../services/factura.service';
 
 @Component({
   imports: [ModalComponent, BadgeComponent, InvoiceFormComponent],
@@ -16,6 +17,7 @@ export class TicketPageComponent {
   //Variables para controlar la venta, la factura y los avisos
   private readonly router = inject(Router);
   private readonly location = inject(Location);
+  private readonly facturaService = inject(FacturaService);
   protected session: SalesNavigationState | null = null;
   protected sale: Sale | null = null;
   protected invoiceOpen = false;
@@ -67,15 +69,38 @@ export class TicketPageComponent {
     if (!this.invoiceOpen || !sale || sale.factura || !this.session) return;
     if (Object.values(fiscal).some((value) => typeof value !== 'string' || !value.trim())) return;
     const factura = { ...fiscal, xml: this.invoiceXml(sale, fiscal) };
-    this.sale = { ...sale, factura };
-    this.session = { ...this.session, sales: this.session.sales.map((item) => item.id === sale.id ? this.sale! : item) };
-    // Conserva la factura en esta entrada del Router para evitar duplicados tras recargar.
-    this.location.replaceState(this.router.url, '', {
-      ...(this.location.getState() as object), salesSession: this.session,
+
+    this.facturaService.registrar({
+      ventaId: sale.id,
+      rfc: fiscal.rfc,
+      nombreRazonSocial: fiscal.nombre,
+      codigoPostal: fiscal.codigoPostal,
+      regimenFiscal: fiscal.regimen,
+      usoFactura: fiscal.uso,
+      facturaXml: factura.xml
+    }).subscribe({
+      next: () => {
+        this.sale = { ...sale, factura };
+        this.session = {
+          ...this.session!,
+          sales: this.session!.sales.map((item) => item.id === sale.id ? this.sale! : item)
+        };
+
+        //Conserva la factura en la navegación después de guardarla
+        this.location.replaceState(this.router.url, '', {
+          ...(this.location.getState() as object),
+          salesSession: this.session
+        });
+
+        this.invoiceOpen = false;
+        this.notice = 'Factura generada correctamente.';
+        this.downloadXml();
+      },
+      error: (error) => {
+        console.error('Error al guardar factura: ', error);
+        this.notice = 'No fue posible guardar la factura.';
+      }
     });
-    this.invoiceOpen = false;
-    this.notice = 'Factura generada correctamente.';
-    this.downloadXml();
   }
 
   //Método para descargar el archivo XML

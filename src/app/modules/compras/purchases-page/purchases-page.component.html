@@ -16,17 +16,17 @@
       <section class="purchases__section" aria-label="Proveedores">
         <!-- Barra de búsqueda de proveedores -->
         <div class="purchases__toolbar">
-          <label class="purchases__field" for="provider-search">Buscar proveedor o contacto
-            <input class="purchases__control purchases__search" id="provider-search" type="search" [(ngModel)]="search" placeholder="Nombre o contacto…" />
+          <label class="purchases__field" for="provider-search">Buscar proveedor
+            <input class="purchases__control purchases__search" id="provider-search" type="search" [(ngModel)]="search" placeholder="Nombre…" />
           </label>
           <span class="purchases__muted">{{ filteredProviders.length }} proveedores</span>
         </div>
         <!-- Mostrar tabla de proveedores -->
-        <app-data-table label="Proveedores de Savia Café" [empty]="filteredProviders.length === 0" [columnCount]="7">
+        <app-data-table label="Proveedores de Savia Café" [empty]="filteredProviders.length === 0" [columnCount]="6">
           <!-- Agrega los encabezados de cada columna -->
           <thead class="data-table__head">
             <tr>
-              @for (heading of ['Proveedor', 'Contacto', 'Teléfono', 'Correo', 'Estado', 'Productos', 'Acciones']; track heading) {
+              @for (heading of ['Proveedor', 'Teléfono', 'Correo', 'Estado', 'Productos', 'Acciones']; track heading) {
                 <th class="data-table__header" scope="col">{{ heading }}</th>
               }
             </tr>
@@ -36,7 +36,6 @@
             @for (provider of filteredProviders; track provider.id) {
               <tr class="data-table__row">
                 <td class="data-table__cell"><strong>{{ provider.nombre }}</strong></td>
-                <td class="data-table__cell">{{ provider.contacto }}</td>
                 <td class="data-table__cell">{{ provider.telefono }}</td>
                 <td class="data-table__cell">{{ provider.correo }}</td>
                 <td class="data-table__cell"><app-badge [text]="provider.estado" [variant]="provider.estado === 'ACTIVO' ? 'success' : 'neutral'" /></td>
@@ -100,7 +99,7 @@
                     <small>+ IVA</small>
                   </div>
                   <!-- Botón para agregar producto a la compra. -->
-                  <button class="purchases__text-button" type="button" (click)="addProduct(product.id)" [attr.aria-label]="'Agregar ' + product.nombre">Agregar</button>
+                  <button class="purchases__text-button" type="button" (click)="addProduct(product.productoId)" [attr.aria-label]="'Agregar ' + product.nombre">Agregar</button>
                 </li>
               } 
               <!-- Define mensajes a mostrar en caso no haya productos asociados al proveedor seleccionado o no se haya seleccionado un proveedor -->
@@ -169,12 +168,12 @@
               @for (purchase of purchases; track purchase.id) {
                 <tr class="data-table__row">
                   <td class="data-table__cell">#{{ purchase.id }}</td><td class="data-table__cell">{{ date(purchase.fechaHora) }}</td>
-                  <td class="data-table__cell">{{ purchase.proveedorNombre }}</td><td class="data-table__cell">{{ purchase.detalles.length }}</td>
+                  <td class="data-table__cell">{{ purchase.proveedorNombre }}</td><td class="data-table__cell">{{ purchase.detalles?.length ?? '—' }}</td>
                   <td class="data-table__cell purchases__amount">{{ money(purchase.subtotal) }}</td>
                   <td class="data-table__cell purchases__amount">{{ money(purchase.iva) }}</td>
                   <td class="data-table__cell purchases__amount">{{ money(purchase.total) }}</td>
                   <td class="data-table__cell">{{ purchase.usuarioResponsable }}</td>
-                  <td class="data-table__cell"><button class="purchases__text-button" type="button" (click)="selectedPurchase = purchase" [attr.aria-label]="'Ver detalle de compra ' + purchase.id">Ver detalle</button></td>
+                  <td class="data-table__cell"><button class="purchases__text-button" type="button" (click)="openPurchaseDetail(purchase)" [attr.aria-label]="'Ver detalle de compra ' + purchase.id">Ver detalle</button></td>
                 </tr>
               }
             </tbody>

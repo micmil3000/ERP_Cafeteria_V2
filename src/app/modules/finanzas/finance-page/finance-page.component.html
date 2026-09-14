@@ -24,23 +24,23 @@
     <!-- Contenedor de un filtro, con su label y respectivo input -->
     <div class="finance__filter-group">
       <label for="finance-from">Fecha desde</label>
-      <input class="finance__control" id="finance-from" name="desde" type="date" [(ngModel)]="filters.desde"
+      <input class="finance__control" id="finance-from" name="desde" type="date" [(ngModel)]="filters.desde" (change)="loadData()"
         [attr.aria-invalid]="invalidDates" aria-describedby="finance-date-error" />
     </div>
     <div class="finance__filter-group">
       <label for="finance-to">Fecha hasta</label>
-      <input class="finance__control" id="finance-to" name="hasta" type="date" [(ngModel)]="filters.hasta"
+      <input class="finance__control" id="finance-to" name="hasta" type="date" [(ngModel)]="filters.hasta" (change)="loadData()"
         [attr.aria-invalid]="invalidDates" aria-describedby="finance-date-error" />
     </div>
     <div class="finance__filter-group">
       <label for="finance-type">Tipo</label>
-      <select class="finance__control" id="finance-type" name="tipo" [(ngModel)]="filters.tipo">
+      <select class="finance__control" id="finance-type" name="tipo" [(ngModel)]="filters.tipo" (change)="loadData()">
         <option value="">Todos</option><option value="INGRESO">Ingreso</option><option value="GASTO">Gasto</option>
       </select>
     </div>
     <div class="finance__filter-group">
       <label for="finance-category">Categoría</label>
-      <select class="finance__control" id="finance-category" name="categoria" [(ngModel)]="filters.categoria">
+      <select class="finance__control" id="finance-category" name="categoria" [(ngModel)]="filters.categoria" (change)="loadData()">
         <option value="">Todas</option>
         <!-- Iteración para categorías disponibles -->
         @for (category of categories; track category) { 
@@ -50,7 +50,7 @@
     </div>
     <div class="finance__filter-group">
       <label for="finance-origin">Origen</label>
-      <select class="finance__control" id="finance-origin" name="origen" [(ngModel)]="filters.origen">
+      <select class="finance__control" id="finance-origin" name="origen" [(ngModel)]="filters.origen" (change)="loadData()">
         <option value="">Todos</option>
         <!-- Iteración para origenes de gasto disponibles -->
         @for (origin of origins; track origin) { 

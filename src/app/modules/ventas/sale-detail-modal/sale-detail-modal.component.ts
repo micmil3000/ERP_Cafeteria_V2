@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { ModalComponent } from '../../../shared/modal/modal.component';
 import { BadgeComponent } from '../../../shared/badge/badge.component';
-import type { Sale } from '../sales-page/sales-page.component';
+import { VentaVista as Sale } from '../../../models/venta.model';
 
 @Component({
   imports: [ModalComponent, BadgeComponent],

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Location } from '@angular/common';
 import { Router } from '@angular/router';
@@ -11,49 +11,14 @@ import { ProductCardComponent } from '../product-card/product-card.component';
 import { SaleSummaryComponent } from '../sale-summary/sale-summary.component';
 import { PaymentModalComponent } from '../payment-modal/payment-modal.component';
 import { SaleDetailModalComponent } from '../sale-detail-modal/sale-detail-modal.component';
+import { ProductoService } from '../../../services/producto.service';
+import { VentaService } from '../../../services/venta.service';
+import { CarritoVenta, EstadoNavegacionVentas, ProductoVenta, Venta, VentaVista } from '../../../models/venta.model';
 
-export interface Product {
-  readonly id: number;
-  readonly nombre: string;
-  readonly categoria: string;
-  readonly precio: number;
-  readonly stock: number;
-  readonly stockMinimo: number;
-  readonly imagen: string;
-}
-
-export interface CartItem {
-  readonly productId: number;
-  readonly nombre: string;
-  readonly precio: number;
-  readonly cantidad: number;
-}
-
-export interface Sale {
-  readonly id: number;
-  readonly fechaHora: string;
-  readonly items: readonly CartItem[];
-  readonly subtotal: number;
-  readonly iva: number;
-  readonly total: number;
-  readonly metodoPago: string;
-  readonly referencia?: string;
-  readonly usuario: string;
-  readonly factura?: {
-    readonly rfc: string;
-    readonly nombre: string;
-    readonly codigoPostal: string;
-    readonly regimen: string;
-    readonly uso: string;
-    readonly xml: string;
-  };
-}
-
-export interface SalesNavigationState {
-  readonly products: readonly Product[];
-  readonly sales: readonly Sale[];
-  readonly saleId?: number;
-}
+export type Product = ProductoVenta;
+export type CartItem = CarritoVenta;
+export type Sale = VentaVista;
+export type SalesNavigationState = EstadoNavegacionVentas;
 
 @Component({
   imports: [FormsModule, PageHeaderComponent, TabsComponent, BadgeComponent, DataTableComponent,
@@ -62,10 +27,13 @@ export interface SalesNavigationState {
   styleUrl: './sales-page.component.css',
   templateUrl: './sales-page.component.html',
 })
-export class SalesPageComponent {
+export class SalesPageComponent implements OnInit {
   //Variables para controlar la navegación y recuperar la sesión
   private readonly router = inject(Router);
   private readonly location = inject(Location);
+  private readonly productoService = inject(ProductoService);
+  private readonly ventaService = inject(VentaService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   //Recupera los productos y ventas guardados en la navegación
   constructor() {
@@ -75,6 +43,63 @@ export class SalesPageComponent {
       this.products = session.products;
       this.sales = session.sales;
     }
+  }
+
+  ngOnInit(): void {
+    this.cargarProductos();
+    this.cargarVentas();
+  }
+
+  //Carga los productos desde el backend
+  private cargarProductos(): void {
+
+    this.productoService.obtenerProductos().subscribe({
+      next: (productos) => {
+        this.products = productos.filter((producto) => producto.estado === 'ACTIVO').map((producto) => ({
+          id: producto.id,
+          nombre: producto.nombre,
+          categoria: producto.categoria,
+          precio: Number(producto.precioVenta),
+          stock: producto.stockActual,
+          stockMinimo: producto.stockMinimo,
+          imagen: producto.imagen || ''
+        }));
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al cargar productos: ', error);
+        this.message = 'No fue posible cargar los productos';
+        this.cdr.markForCheck();
+      }
+    });
+
+  }
+
+  //Carga el historial de ventas desde el backend
+  private cargarVentas(): void {
+
+    this.ventaService.obtenerVentas().subscribe({
+      next: (ventas) => {
+        this.sales = ventas.map((venta) => ({
+          id: venta.id,
+          fechaHora: venta.fechaHora,
+          items: Array(venta.cantidadProductos ?? 0).fill({}),
+          subtotal: Number(venta.subtotal),
+          iva: Number(venta.iva),
+          total: Number(venta.total),
+          metodoPago: '',
+          usuario: venta.usuario,
+          factura: venta.facturada ? {} as Sale['factura'] : undefined
+        }));
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al cargar ventas: ', error);
+        this.message = 'No fue posible cargar las ventas';
+        this.cdr.markForCheck();
+      }
+    });
+
   }
 
   //Variables para controlar rol, filtros, carrito y modales
@@ -92,25 +117,9 @@ export class SalesPageComponent {
   protected cancelOpen = false;
   protected selectedSale: Sale | null = null;
 
-  // Catálogo independiente para esta práctica, sin sincronización con Inventario.
-  protected products: readonly Product[] = [
-    { id: 1, nombre: 'Latte Vainilla', categoria: 'Cafés', precio: 64, stock: 18, stockMinimo: 5, imagen: '/images/latte-vainilla.jpg' },
-    { id: 2, nombre: 'Capuchino', categoria: 'Cafés', precio: 56, stock: 3, stockMinimo: 5, imagen: '/images/capuchino.jpg' },
-    { id: 3, nombre: 'Americano', categoria: 'Cafés', precio: 40, stock: 26, stockMinimo: 8, imagen: '/images/americano.jpg' },
-    { id: 4, nombre: 'Mocha', categoria: 'Cafés', precio: 68, stock: 7, stockMinimo: 4, imagen: '/images/mocha.jpg' },
-    { id: 5, nombre: 'Frappé de Café', categoria: 'Bebidas frías', precio: 72, stock: 2, stockMinimo: 4, imagen: '/images/frappe-cafe.jpg' },
-    { id: 6, nombre: 'Té Matcha', categoria: 'Tés', precio: 62, stock: 10, stockMinimo: 4, imagen: '/images/te-matcha.jpg' },
-    { id: 7, nombre: 'Rol de Canela', categoria: 'Panadería', precio: 46, stock: 2, stockMinimo: 3, imagen: '/images/rol-canela.jpg' },
-    { id: 8, nombre: 'Pastel de Chocolate', categoria: 'Postres', precio: 75, stock: 1, stockMinimo: 2, imagen: '/images/pastel-chocolate.jpg' },
-  ];
-
-  //Datos de prueba del historial de ventas
-  protected sales: readonly Sale[] = [
-    this.mockSale(1051, '2026-09-03T09:20:00-06:00', 'Ana Torres', 1, 2, 'Efectivo', true),
-    this.mockSale(1052, '2026-09-04T11:10:00-06:00', 'Carlos Ruiz', 3, 3, 'Tarjeta', false),
-    this.mockSale(1053, '2026-09-05T13:45:00-06:00', 'Ana Torres', 6, 2, 'Transferencia', false),
-    this.mockSale(1054, '2026-09-06T08:35:00-06:00', 'Carlos Ruiz', 7, 2, 'Efectivo', true),
-  ];
+  //Productos y ventas cargados desde el backend
+  protected products: readonly Product[] = [];
+  protected sales: readonly Sale[] = [];
 
   //Obtiene los productos filtrados por nombre y categoría
   protected get filteredProducts() {
@@ -203,45 +212,95 @@ export class SalesPageComponent {
 
   //Método para confirmar el pago y guardar la venta
   protected confirmPayment(result: { approved: boolean; method: string }): void {
-    if (!this.paymentOpen || !result.approved || !['Efectivo', 'Tarjeta', 'Transferencia'].includes(result.method)) return;
+
+    if(!this.paymentOpen || !result.approved || !['Efectivo', 'Tarjeta', 'Transferencia'].includes(result.method)) return;
+
     this.paymentError = this.stockError();
-    if (this.paymentError) return;
-    const id = Math.max(0, ...this.sales.map((sale) => sale.id)) + 1;
-    const sale: Sale = {
-      id, fechaHora: new Date().toISOString(), items: this.cart.map((item) => ({ ...item })),
-      subtotal: this.subtotal, iva: this.iva, total: this.total, metodoPago: result.method,
-      referencia: 'SIM-' + id, usuario: this.currentUser,
-    };
-    this.products = this.products.map((product) => ({
-      ...product, stock: product.stock - (this.cart.find((item) => item.productId === product.id)?.cantidad ?? 0),
+
+    if(this.paymentError) return;
+
+    const detalles = this.cart.map((item) => ({
+      productoId: item.productId,
+      cantidad: item.cantidad
     }));
-    this.sales = [sale, ...this.sales];
-    this.cart = [];
-    this.paymentOpen = false;
-    this.message = '';
-    void this.router.navigate(['/ventas/ticket'], {
-      replaceUrl: true,
-      state: { salesSession: { products: this.products, sales: this.sales, saleId: sale.id } },
+
+    this.ventaService.registrarVenta({
+      usuarioId: 1,
+      metodoPago: result.method,
+      detalles
+    }).subscribe({
+      next: (respuesta) => {
+        this.ventaService.obtenerVenta(respuesta.id).subscribe({
+          next: (venta) => {
+            const sale = this.convertirVenta(venta);
+            this.cart = [];
+            this.paymentOpen = false;
+            this.cargarProductos();
+            this.cargarVentas();
+
+            void this.router.navigate(['/ventas/ticket'], {
+              replaceUrl: true,
+              state: {
+                salesSession: {
+                  products: this.products,
+                  sales: [sale, ...this.sales.filter((item) => item.id !== sale.id)],
+                  saleId: sale.id
+                }
+              }
+            });
+          },
+          error: (error) => {
+            console.error('Error al consultar la venta registrada: ', error);
+            this.paymentError = 'La venta se registró, pero no fue posible consultar el ticket.';
+            this.cdr.markForCheck();
+          }
+        });
+      },
+      error: (error) => {
+        this.paymentError = error.error?.mensaje || 'No fue posible registrar la venta.';
+        this.cdr.markForCheck();
+      }
     });
+
   }
 
   //Método para abrir el detalle de una venta
   protected openDetail(sale: Sale): void {
-    this.selectedSale = this.visibleSales.find((s) => s.id === sale.id) ?? null;
+
+    this.ventaService.obtenerVenta(sale.id).subscribe({
+      next: (venta) => {
+        this.selectedSale = this.convertirVenta(venta);
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al consultar venta: ', error);
+        this.message = 'No fue posible consultar la venta';
+        this.cdr.markForCheck();
+      }
+    });
+
   }
 
-  //Genera una venta de prueba para el historial
-  private mockSale(id: number, fechaHora: string, usuario: string, productId: number, cantidad: number, metodoPago: string, invoiced: boolean): Sale {
-    const product = this.products.find((p) => p.id === productId)!;
-    const subtotalCents = Math.round(product.precio * 100) * cantidad;
-    const ivaCents = Math.round(subtotalCents * 0.16);
-    const sale: Sale = {
-      id, fechaHora, usuario, metodoPago, referencia: 'SIM-' + id,
-      items: [{ productId, nombre: product.nombre, precio: product.precio, cantidad }],
-      subtotal: subtotalCents / 100, iva: ivaCents / 100, total: (subtotalCents + ivaCents) / 100,
+  //Convierte la respuesta del backend para mostrarla en la pantalla
+  private convertirVenta(venta : Venta): Sale {
+
+    return {
+      id: venta.id,
+      fechaHora: venta.fechaHora,
+      items: (venta.detalles ?? []).map((detalle) => ({
+        productId: detalle.productoId,
+        nombre: detalle.nombre,
+        precio: Number(detalle.precioUnitario),
+        cantidad: detalle.cantidad
+      })),
+      subtotal: Number(venta.subtotal),
+      iva: Number(venta.iva),
+      total: Number(venta.total),
+      metodoPago: venta.metodoPago || '',
+      referencia: venta.numeroVenta,
+      usuario: venta.usuario
     };
-    if (!invoiced) return sale;
-    const fiscal = { rfc: 'XAXX010101000', nombre: 'Receptor de ejemplo', codigoPostal: '44100', regimen: 'Régimen de ejemplo', uso: 'Uso de ejemplo' };
-    return { ...sale, factura: { ...fiscal, xml: '' } };
+
   }
+
 }

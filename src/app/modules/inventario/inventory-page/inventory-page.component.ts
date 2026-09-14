@@ -1,22 +1,12 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
 import { ModalComponent } from '../../../shared/modal/modal.component';
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
 import { ProductTableComponent } from '../product-table/product-table.component';
 import { ProductFormComponent } from '../product-form/product-form.component';
-
-export interface Product {
-  readonly id: number;
-  readonly nombre: string;
-  readonly categoria: string;
-  readonly precioVenta: number;
-  readonly stockActual: number;
-  readonly stockMinimo: number;
-  readonly descripcion: string;
-  readonly imagen: string;
-  readonly estado: 'ACTIVO' | 'INACTIVO';
-}
+import { Producto } from '../../../models/producto.model';
+import { ProductoService } from '../../../services/producto.service';
 
 @Component({
   imports: [FormsModule, PageHeaderComponent, ModalComponent, ConfirmDialogComponent, ProductTableComponent, ProductFormComponent],
@@ -24,38 +14,55 @@ export interface Product {
   styleUrl: './inventory-page.component.css',
   templateUrl: './inventory-page.component.html',
 })
-export class inventoryPageComponent {
+
+export class inventoryPageComponent implements OnInit {
   //Variable para definir el rol. Para pruebas
   protected readonly currentRole: 'GERENTE' | 'TRABAJADOR' = 'GERENTE'; // Cambiar a 'GERENTE' para habilitar la edición.
   //Variables para manejar categorias, filtros aplicados, formulario de producto, version actual del producto, desactivar producto
   protected readonly categories = ['Cafés', 'Bebidas frías', 'Tés', 'Panadería', 'Postres'];
   protected filters = { search: '', category: '', stock: '', status: '', order: 'AZ' };
   protected formOpen = false;
-  protected versionSource: Product | null = null;
-  protected pendingDeactivation: Product | null = null;
+  protected versionSource: Producto | null = null;
+  protected pendingDeactivation: Producto | null = null;
   //Mensaje para notificar al usuario de la acción realizada
   protected notice = '';
 
-  // Datos locales: una recarga restaura este catálogo.
-  protected products: readonly Product[] = [
-    { id: 1, nombre: 'Latte Vainilla', categoria: 'Cafés', precioVenta: 64, stockActual: 18, stockMinimo: 5, descripcion: 'Espresso con leche vaporizada y un toque de vainilla.', imagen: '', estado: 'ACTIVO' },
-    { id: 2, nombre: 'Capuchino', categoria: 'Cafés', precioVenta: 56, stockActual: 3, stockMinimo: 5, descripcion: 'Espresso con leche vaporizada y espuma cremosa.', imagen: '', estado: 'ACTIVO' },
-    { id: 3, nombre: 'Americano', categoria: 'Cafés', precioVenta: 40, stockActual: 26, stockMinimo: 8, descripcion: 'Espresso combinado con agua caliente.', imagen: '', estado: 'ACTIVO' },
-    { id: 4, nombre: 'Mocha', categoria: 'Cafés', precioVenta: 68, stockActual: 7, stockMinimo: 4, descripcion: 'Espresso con leche vaporizada y chocolate.', imagen: '', estado: 'ACTIVO' },
-    { id: 5, nombre: 'Frappé de Café', categoria: 'Bebidas frías', precioVenta: 72, stockActual: 2, stockMinimo: 4, descripcion: 'Bebida fría de café con hielo y leche.', imagen: '', estado: 'ACTIVO' },
-    { id: 6, nombre: 'Té Matcha', categoria: 'Tés', precioVenta: 62, stockActual: 10, stockMinimo: 4, descripcion: 'Té matcha preparado con leche vaporizada.', imagen: '', estado: 'ACTIVO' },
-    { id: 7, nombre: 'Rol de Canela', categoria: 'Panadería', precioVenta: 46, stockActual: 2, stockMinimo: 3, descripcion: 'Pan suave horneado con canela y glaseado.', imagen: '', estado: 'ACTIVO' },
-    { id: 8, nombre: 'Pastel de Chocolate', categoria: 'Postres', precioVenta: 75, stockActual: 1, stockMinimo: 2, descripcion: 'Rebanada de pastel de chocolate con cobertura cremosa.', imagen: '', estado: 'ACTIVO' },
-  ];
+  //Productos obtenidos del backend
+  protected products : Producto[] = [];
 
+  //Define el acceso del componente al Angular service
+  constructor(
+    private productoService : ProductoService,
+    private cdr : ChangeDetectorRef
+  ) {}
+
+  //Cuando Angular inicializa el componente cargar los productos desde el backend
+  ngOnInit(): void {
+    this.loadProducts();
+  }
+
+  //Método para cargar los productos desde el backend
+  private loadProducts() : void {
+    this.productoService.obtenerProductos().subscribe({
+      next: (products) => {
+        //Obtiene productos y forza a que se actualice
+        this.products = products;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al cargar productos: ', error);
+        this.notice = 'No fue posible cargar los productos';
+      }
+    });
+  }
   //Define el estado del stock del producto
-  protected stockStatus(product: Product): string {
+  protected stockStatus(product: Producto): string {
     return product.stockActual === 0 ? 'AGOTADO'
       : product.stockActual <= product.stockMinimo ? 'STOCK BAJO' : 'DISPONIBLE';
   }
 
   //Obtiene productos después de filtrarlos
-  protected get filteredProducts(): readonly Product[] {
+  protected get filteredProducts(): readonly Producto[] {
     const f = this.filters;
     const search = f.search.trim().toLocaleLowerCase('es-MX');
     return this.products.filter((p) =>
@@ -90,7 +97,7 @@ export class inventoryPageComponent {
   }
 
   //Abrir el modal para crear una nueva versión de un producto existente
-  protected openVersion(product: Product): void {
+  protected openVersion(product: Producto): void {
     if (this.currentRole !== 'GERENTE') return;
     this.versionSource = product;
     this.formOpen = true;
@@ -104,29 +111,59 @@ export class inventoryPageComponent {
   }
 
   //Método para guardar un producto
-  protected saveProduct(value: Omit<Product, 'id' | 'estado'>): void {
+  protected saveProduct(value: Omit<Producto, 'id' | 'estado'>): void {
     if (this.currentRole !== 'GERENTE' || !this.formOpen) return;
+    
     const source = this.versionSource;
-    const product: Product = {
+    const product = {
       ...value,
-      id: Math.max(0, ...this.products.map((p) => p.id)) + 1,
-      estado: 'ACTIVO',
-      // Una versión conserva existencias; este formulario no realiza ajustes de stock.
-      stockActual: source ? source.stockActual : value.stockActual,
+      // Una versión conserva el stock del producto anterior
+      stockActual: source 
+      ? source.stockActual 
+      : value.stockActual,
     };
-    this.products = [
-      ...this.products.map((p): Product => p.id === source?.id ? { ...p, estado: 'INACTIVO' } : p),
-      product,
-    ];
-    this.closeForm();
-    this.notice = source ? 'Nueva versión creada. El registro anterior permanece inactivo.' : 'Producto registrado correctamente.';
-    if (!this.filteredProducts.some((p) => p.id === product.id)) {
-      this.notice += ' El nuevo producto no coincide con los filtros actuales.';
+
+    if(source){
+      this.productoService.crearNuevaVersion(source.id, product).subscribe({
+        next: () => {
+          this.closeForm();
+
+          this.notice = 'Nueva versión creada. El registro anterior permanece inactivo.';
+
+          this.loadProducts();
+
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error al crear nueva versión: ', error);
+
+          this.notice ='No fue posible crear la nueva versión';
+        }
+      });
+      return;
     }
+
+    this.productoService.registrarProducto(product).subscribe({
+      next: (respuesta) => {
+        console.log('ENTRó AL NEXT', respuesta);
+
+        this.closeForm();
+
+        this.notice = 'Producto registrado correctamente';
+
+        this.loadProducts();
+
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al registrar producto: ', error);
+        this.notice = 'No fue posible registrar el producto';
+      }
+    });
   }
 
   //Método para solicitar desactivar un producto
-  protected requestDeactivation(product: Product): void {
+  protected requestDeactivation(product: Producto): void {
     if (this.currentRole === 'GERENTE' && product.estado === 'ACTIVO') {
       this.pendingDeactivation = product;
     }
@@ -136,8 +173,22 @@ export class inventoryPageComponent {
   protected deactivate(): void {
     if (this.currentRole !== 'GERENTE' || !this.pendingDeactivation) return;
     const id = this.pendingDeactivation.id;
-    this.products = this.products.map((p): Product => p.id === id ? { ...p, estado: 'INACTIVO' } : p);
-    this.pendingDeactivation = null;
-    this.notice = 'Producto desactivado. Puedes consultarlo con el filtro de estado Todos o Inactivo.';
+    
+    this.productoService.desactivarProducto(id).subscribe({
+      next: () => {
+        this.pendingDeactivation = null;
+
+        this.notice = 'Producto desactivado. Puedes consultarlo con el filtro de estado Todos o Inactivo.';
+
+        this.loadProducts();
+
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al desactivar producto: ', error);
+
+        this.notice = 'No fue posible desactivar el producto';
+      }
+    });
   }
 }

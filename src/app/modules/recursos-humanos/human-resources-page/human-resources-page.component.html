@@ -1,41 +1,39 @@
 <section class="human-resources" aria-label="Recursos Humanos">
-  <!-- Encabezado y acciones según el rol -->
-  <app-page-header title="Recursos Humanos" [description]="currentRole === 'GERENTE' ? 'Gestiona al personal, horarios, asistencia y pagos de Savia Café.' : 'Consulta tu información, horario, asistencia y pagos en Savia Café.'">
-    @if (currentRole === 'GERENTE' && activeTab === 'people') {
-      <button class="human-resources__button" type="button" (click)="openEmployee()">Registrar trabajador</button>
-    }
-    @if (currentRole === 'GERENTE' && activeTab === 'payments') {
-      <button class="human-resources__button" type="button" (click)="paymentOpen = true">Registrar pago</button>
-    }
-  </app-page-header>
+  <!-- Encabezado según el rol -->
+  <app-page-header
+    title="Recursos Humanos"
+    [description]="currentRole === 'GERENTE' ? 'Consulta al personal, horarios, asistencia y pagos de Savia Café.' : 'Consulta tu información, horario, asistencia y pagos en Savia Café.'"
+  />
+
   <app-tabs [tabs]="tabs" [activeTab]="activeTab" (tabChange)="activeTab = $event" />
   <p class="human-resources__notice" role="status">{{ notice }}</p>
 
-  <!-- Sección de información de trabajadores -->
+  <!-- Sección de información de funcionarios -->
   @if (activeTab === 'people') {
     @if (currentRole === 'GERENTE') {
       <section class="human-resources__section" aria-label="Trabajadores">
-        <!-- Tabla de trabajadores -->
-        <app-data-table label="Trabajadores de Savia Café" [empty]="employees.length === 0" [columnCount]="8">
-          <thead class="data-table__head"><tr>
-            @for (heading of ['Trabajador', 'Correo', 'Teléfono', 'Fecha contratación', 'Salario', 'Horario', 'Estado', 'Acciones']; track heading) {
-              <th class="data-table__header" scope="col">{{ heading }}</th>
-            }
-          </tr></thead>
+        <app-data-table label="Trabajadores de Savia Café" [empty]="funcionarios.length === 0" [columnCount]="8">
+          <thead class="data-table__head">
+            <tr>
+              @for (heading of ['Trabajador', 'Rol', 'Correo', 'Teléfono', 'Fecha contratación', 'Salario', 'Estado', 'Horario']; track heading) {
+                <th class="data-table__header" scope="col">{{ heading }}</th>
+              }
+            </tr>
+          </thead>
           <tbody class="data-table__body">
-            <!-- Iteración para mostrar los trabajadores -->
-            @for (employee of employees; track employee.id) {
+            @for (funcionario of funcionarios; track funcionario.id) {
               <tr class="data-table__row">
-                <td class="data-table__cell"><strong>{{ name(employee) }}</strong><small class="human-resources__role">{{ employee.id === 1 ? 'Gerente' : 'Trabajador' }}</small></td>
-                <td class="data-table__cell">{{ employee.correo }}</td><td class="data-table__cell">{{ employee.telefono }}</td>
-                <td class="data-table__cell">{{ date(employee.fechaContratacion) }}</td><td class="data-table__cell human-resources__amount">{{ money(employee.salario) }}</td>
-                <td class="data-table__cell"><button class="human-resources__text-button" type="button" (click)="scheduleEmployee = employee" [attr.aria-label]="'Consultar o editar horario de ' + name(employee)">Ver / editar horario</button></td>
-                <td class="data-table__cell"><app-badge [text]="employee.estado" [variant]="employee.estado === 'ACTIVO' ? 'success' : 'neutral'" /></td>
+                <td class="data-table__cell"><strong>{{ name(funcionario) }}</strong></td>
+                <td class="data-table__cell"><small class="human-resources__role">{{ funcionario.rol }}</small></td>
+                <td class="data-table__cell">{{ funcionario.correo }}</td>
+                <td class="data-table__cell">{{ funcionario.telefono }}</td>
+                <td class="data-table__cell">{{ date(funcionario.fechaContratacion) }}</td>
+                <td class="data-table__cell human-resources__amount">{{ money(funcionario.salario) }}</td>
                 <td class="data-table__cell">
-                  <div class="human-resources__actions">
-                    <button class="human-resources__text-button" type="button" (click)="openEmployee(employee)" [attr.aria-label]="'Editar ' + name(employee)">Editar</button>
-                    @if (employee.estado === 'ACTIVO') { <button class="human-resources__text-button human-resources__text-button--danger" type="button" (click)="pendingDeactivation = employee" [attr.aria-label]="'Desactivar ' + name(employee)">Desactivar</button> }
-                  </div>
+                  <app-badge [text]="funcionario.estado" [variant]="funcionario.estado === 'ACTIVO' ? 'success' : 'neutral'" />
+                </td>
+                <td class="data-table__cell">
+                  <button class="human-resources__text-button" type="button" (click)="consultarHorario(funcionario)" [attr.aria-label]="'Consultar horario de ' + name(funcionario)">Consultar horario</button>
                 </td>
               </tr>
             }
@@ -44,61 +42,91 @@
       </section>
     } @else {
       <!-- Información y horario del trabajador actual -->
-      <section class="human-resources__personal" aria-label="Mi información">
-        <article class="human-resources__profile">
-          <header><p class="human-resources__eyebrow">Tu espacio en Savia</p><h2 class="human-resources__title">{{ name(currentEmployee) }}</h2></header>
-          <dl class="human-resources__details">
-            <div class="human-resources__detail-row"><dt>Nombre</dt><dd>{{ currentEmployee.nombre }}</dd></div>
-            <div class="human-resources__detail-row"><dt>Apellidos</dt><dd>{{ currentEmployee.apellidos }}</dd></div>
-            <div class="human-resources__detail-row"><dt>Correo</dt><dd>{{ currentEmployee.correo }}</dd></div>
-            <div class="human-resources__detail-row"><dt>Teléfono</dt><dd>{{ currentEmployee.telefono }}</dd></div>
-            <div class="human-resources__detail-row"><dt>Fecha contratación</dt><dd>{{ date(currentEmployee.fechaContratacion) }}</dd></div>
-            <div class="human-resources__detail-row"><dt>Salario</dt><dd>{{ money(currentEmployee.salario) }}</dd></div>
-          </dl>
-        </article>
-        <article class="human-resources__schedule">
-          <h2 class="human-resources__title">Mi horario</h2>
-          <ul class="human-resources__week">
-            @for (day of scheduleFor(currentEmployee.id); track day.dia) {
-              <li class="human-resources__day"><strong>{{ dayNames[day.dia] }}</strong><span>{{ day.descanso ? 'Descanso' : day.entrada + ' - ' + day.salida }}</span></li>
-            }
-          </ul>
-        </article>
-      </section>
+      @if (currentFuncionario; as funcionario) {
+        <section class="human-resources__personal" aria-label="Mi información">
+          <article class="human-resources__profile">
+            <header>
+              <p class="human-resources__eyebrow">Tu espacio en Savia</p>
+              <h2 class="human-resources__title">{{ name(funcionario) }}</h2>
+            </header>
+            <dl class="human-resources__details">
+              <div class="human-resources__detail-row"><dt>Nombre</dt><dd>{{ funcionario.nombre }}</dd></div>
+              <div class="human-resources__detail-row"><dt>Apellidos</dt><dd>{{ funcionario.apellidos }}</dd></div>
+              <div class="human-resources__detail-row"><dt>Correo</dt><dd>{{ funcionario.correo }}</dd></div>
+              <div class="human-resources__detail-row"><dt>Teléfono</dt><dd>{{ funcionario.telefono }}</dd></div>
+              <div class="human-resources__detail-row"><dt>Fecha contratación</dt><dd>{{ date(funcionario.fechaContratacion) }}</dd></div>
+              <div class="human-resources__detail-row"><dt>Salario</dt><dd>{{ money(funcionario.salario) }}</dd></div>
+            </dl>
+          </article>
+
+          <article class="human-resources__schedule">
+            <h2 class="human-resources__title">Mi horario</h2>
+            <ul class="human-resources__week">
+              @for (dia of horario; track dia.id) {
+                <li class="human-resources__day">
+                  <strong>{{ dia.diaSemana }}</strong>
+                  <span>{{ dia.horaEntrada }} - {{ dia.horaSalida }}</span>
+                </li>
+              } @empty {
+                <li class="human-resources__day">No hay horario registrado.</li>
+              }
+            </ul>
+          </article>
+        </section>
+      }
     }
   }
 
   <!-- Sección de asistencia -->
   @if (activeTab === 'attendance') {
     <section class="human-resources__attendance" aria-label="Asistencia">
-      <article class="human-resources__attendance-card">
-        <header><p class="human-resources__eyebrow">Hoy · Mi asistencia</p><h2 class="human-resources__title">{{ name(currentEmployee) }}</h2></header>
-        <dl class="human-resources__today">
-          <div><dt>Entrada</dt><dd>{{ todayAttendance?.entrada || 'Sin registro' }}</dd></div>
-          <div><dt>Salida</dt><dd>{{ todayAttendance?.salida || 'Sin registro' }}</dd></div>
-          <div><dt>Estado</dt><dd>
-            @if (todayAttendance; as record) { <app-badge [text]="record.estado" [variant]="record.estado === 'PRESENTE' ? 'success' : record.estado === 'RETARDO' ? 'warning' : 'danger'" /> }
-            @else { Sin registro }
-          </dd></div>
-        </dl>
-        <div class="human-resources__actions">
-          <button class="human-resources__button" type="button" [disabled]="!!todayAttendance?.entrada || currentEmployee.estado !== 'ACTIVO'" (click)="registerEntry()">Registrar entrada</button>
-          <button class="human-resources__button human-resources__button--secondary" type="button" [disabled]="!todayAttendance?.entrada || !!todayAttendance?.salida" (click)="registerExit()">Registrar salida</button>
-        </div>
-      </article>
+      @if (currentRole === 'TRABAJADOR' && currentFuncionario; as funcionario) {
+        <article class="human-resources__attendance-card">
+          <header>
+            <p class="human-resources__eyebrow">Hoy · Mi asistencia</p>
+            <h2 class="human-resources__title">{{ name(funcionario) }}</h2>
+          </header>
+          <dl class="human-resources__today">
+            <div><dt>Entrada</dt><dd>{{ todayAttendance?.horaEntrada || 'Sin registro' }}</dd></div>
+            <div><dt>Salida</dt><dd>{{ todayAttendance?.horaSalida || 'Sin registro' }}</dd></div>
+            <div>
+              <dt>Estado</dt>
+              <dd>
+                @if (todayAttendance; as record) {
+                  <app-badge [text]="record.estado" [variant]="record.estado === 'PRESENTE' ? 'success' : record.estado === 'RETARDO' ? 'warning' : 'danger'" />
+                } @else {
+                  Sin registro
+                }
+              </dd>
+            </div>
+          </dl>
+        </article>
+      }
+
       <h2 class="human-resources__title">{{ currentRole === 'GERENTE' ? 'Historial de asistencia' : 'Mi historial reciente' }}</h2>
-      <!-- Tabla del historial de asistencia -->
-      <app-data-table label="Historial de asistencia" [empty]="visibleAttendance.length === 0" [columnCount]="currentRole === 'GERENTE' ? 5 : 4">
-        <thead class="data-table__head"><tr>
-          @if (currentRole === 'GERENTE') { <th class="data-table__header" scope="col">Trabajador</th> }
-          @for (heading of ['Fecha', 'Entrada', 'Salida', 'Estado']; track heading) { <th class="data-table__header" scope="col">{{ heading }}</th> }
-        </tr></thead>
+      <app-data-table label="Historial de asistencia" [empty]="asistencias.length === 0" [columnCount]="currentRole === 'GERENTE' ? 5 : 4">
+        <thead class="data-table__head">
+          <tr>
+            @if (currentRole === 'GERENTE') {
+              <th class="data-table__header" scope="col">Trabajador</th>
+            }
+            @for (heading of ['Fecha', 'Entrada', 'Salida', 'Estado']; track heading) {
+              <th class="data-table__header" scope="col">{{ heading }}</th>
+            }
+          </tr>
+        </thead>
         <tbody class="data-table__body">
-          @for (record of visibleAttendance; track record.id) {
+          @for (record of asistencias; track record.id) {
             <tr class="data-table__row">
-              @if (currentRole === 'GERENTE') { <td class="data-table__cell">{{ employeeName(record.empleadoId) }}</td> }
-              <td class="data-table__cell">{{ date(record.fecha) }}</td><td class="data-table__cell">{{ record.entrada || '—' }}</td><td class="data-table__cell">{{ record.salida || '—' }}</td>
-              <td class="data-table__cell"><app-badge [text]="record.estado" [variant]="record.estado === 'PRESENTE' ? 'success' : record.estado === 'RETARDO' ? 'warning' : 'danger'" /></td>
+              @if (currentRole === 'GERENTE') {
+                <td class="data-table__cell">{{ record.funcionario }}</td>
+              }
+              <td class="data-table__cell">{{ date(record.fecha) }}</td>
+              <td class="data-table__cell">{{ record.horaEntrada || '—' }}</td>
+              <td class="data-table__cell">{{ record.horaSalida || '—' }}</td>
+              <td class="data-table__cell">
+                <app-badge [text]="record.estado" [variant]="record.estado === 'PRESENTE' ? 'success' : record.estado === 'RETARDO' ? 'warning' : 'danger'" />
+              </td>
             </tr>
           }
         </tbody>
@@ -109,20 +137,36 @@
   <!-- Sección de pagos de salario -->
   @if (activeTab === 'payments') {
     <section class="human-resources__payments" aria-label="Pagos de salario">
-      <app-data-table label="Historial de pagos de salario" [empty]="visiblePayments.length === 0" [columnCount]="currentRole === 'GERENTE' ? 6 : 4">
-        <thead class="data-table__head"><tr>
-          @if (currentRole === 'GERENTE') { <th class="data-table__header" scope="col">Trabajador</th> }
-          @for (heading of ['Periodo', 'Fecha de pago', 'Monto']; track heading) { <th class="data-table__header" scope="col">{{ heading }}</th> }
-          @if (currentRole === 'GERENTE') { <th class="data-table__header" scope="col">Responsable</th> }
-          <th class="data-table__header" scope="col">Acción</th>
-        </tr></thead>
+      <app-data-table label="Historial de pagos de salario" [empty]="pagos.length === 0" [columnCount]="currentRole === 'GERENTE' ? 6 : 4">
+        <thead class="data-table__head">
+          <tr>
+            @if (currentRole === 'GERENTE') {
+              <th class="data-table__header" scope="col">Trabajador</th>
+            }
+            @for (heading of ['Periodo', 'Fecha de pago', 'Monto']; track heading) {
+              <th class="data-table__header" scope="col">{{ heading }}</th>
+            }
+            @if (currentRole === 'GERENTE') {
+              <th class="data-table__header" scope="col">Responsable</th>
+            }
+            <th class="data-table__header" scope="col">Acción</th>
+          </tr>
+        </thead>
         <tbody class="data-table__body">
-          @for (payment of visiblePayments; track payment.id) {
+          @for (pago of pagos; track pago.id) {
             <tr class="data-table__row">
-              @if (currentRole === 'GERENTE') { <td class="data-table__cell">{{ payment.trabajador }}</td> }
-              <td class="data-table__cell">{{ payment.periodo }}</td><td class="data-table__cell">{{ date(payment.fecha) }}</td><td class="data-table__cell human-resources__amount">{{ money(payment.monto) }}</td>
-              @if (currentRole === 'GERENTE') { <td class="data-table__cell">{{ payment.responsable }}</td> }
-              <td class="data-table__cell"><button class="human-resources__text-button" type="button" (click)="openPaymentDetail(payment)" [attr.aria-label]="'Ver pago de ' + payment.trabajador + ', ' + payment.periodo">Ver detalle</button></td>
+              @if (currentRole === 'GERENTE') {
+                <td class="data-table__cell">{{ pago.trabajador }}</td>
+              }
+              <td class="data-table__cell">{{ periodo(pago) }}</td>
+              <td class="data-table__cell">{{ date(pago.fechaPago) }}</td>
+              <td class="data-table__cell human-resources__amount">{{ money(pago.monto) }}</td>
+              @if (currentRole === 'GERENTE') {
+                <td class="data-table__cell">{{ pago.responsable }}</td>
+              }
+              <td class="data-table__cell">
+                <button class="human-resources__text-button" type="button" (click)="selectedPayment = pago" [attr.aria-label]="'Ver pago de ' + pago.trabajador + ', ' + periodo(pago)">Ver detalle</button>
+              </td>
             </tr>
           }
         </tbody>
@@ -131,36 +175,29 @@
   }
 </section>
 
-<!-- Modales para administrar trabajadores, horarios y pagos -->
-@if (currentRole === 'GERENTE') {
-  @if (formOpen) {
-    <app-modal [open]="true" [title]="editingEmployee ? 'Editar trabajador' : 'Registrar trabajador'" (close)="formOpen = false">
-      <app-employee-form [employee]="editingEmployee" (save)="saveEmployee($event)" (cancel)="formOpen = false" />
-    </app-modal>
-  }
-  @if (pendingDeactivation; as employee) {
-    <app-confirm-dialog [open]="true" title="Desactivar trabajador" [message]="'¿Deseas desactivar a ' + name(employee) + '? Sus registros se conservarán.'"
-      confirmText="Desactivar" variant="danger" (confirm)="deactivate()" (cancel)="pendingDeactivation = null" />
-  }
-  @if (scheduleEmployee; as employee) {
-    <app-modal [open]="true" [title]="'Horario de ' + name(employee)" (close)="scheduleEmployee = null">
-      <app-schedule-form [schedule]="scheduleFor(employee.id)" (save)="saveSchedule($event)" (cancel)="scheduleEmployee = null" />
-    </app-modal>
-  }
-  @if (paymentOpen) {
-    <app-modal [open]="true" title="Registrar pago de salario" (close)="paymentOpen = false">
-      <app-salary-payment-form [employees]="activeEmployees" (save)="savePayment($event)" (cancel)="paymentOpen = false" />
-    </app-modal>
-  }
+<!-- Modal de consulta de horario para gerente -->
+@if (horarioFuncionario; as funcionario) {
+  <app-modal [open]="true" [title]="'Horario de ' + name(funcionario)" (close)="horarioFuncionario = null">
+    <ul class="human-resources__week">
+      @for (dia of horario; track dia.id) {
+        <li class="human-resources__day"><strong>{{ dia.diaSemana }}</strong><span>{{ dia.horaEntrada }} - {{ dia.horaSalida }}</span></li>
+      } @empty {
+        <li class="human-resources__day">No hay horario registrado.</li>
+      }
+    </ul>
+    <button modal-footer class="human-resources__button" type="button" (click)="horarioFuncionario = null">Cerrar</button>
+  </app-modal>
 }
+
 <!-- Modal para mostrar el comprobante de pago -->
-@if (selectedPayment; as payment) {
+@if (selectedPayment; as pago) {
   <app-modal [open]="true" title="Comprobante de pago" (close)="selectedPayment = null">
     <dl class="human-resources__details">
-      <div class="human-resources__detail-row"><dt>Trabajador</dt><dd>{{ payment.trabajador }}</dd></div>
-      <div class="human-resources__detail-row"><dt>Periodo</dt><dd>{{ payment.periodo }}</dd></div>
-      <div class="human-resources__detail-row"><dt>Fecha</dt><dd>{{ date(payment.fecha) }}</dd></div>
-      <div class="human-resources__detail-row"><dt>Monto</dt><dd><strong>{{ money(payment.monto) }}</strong></dd></div>
+      <div class="human-resources__detail-row"><dt>Trabajador</dt><dd>{{ pago.trabajador }}</dd></div>
+      <div class="human-resources__detail-row"><dt>Periodo</dt><dd>{{ periodo(pago) }}</dd></div>
+      <div class="human-resources__detail-row"><dt>Fecha</dt><dd>{{ date(pago.fechaPago) }}</dd></div>
+      <div class="human-resources__detail-row"><dt>Monto</dt><dd><strong>{{ money(pago.monto) }}</strong></dd></div>
+      <div class="human-resources__detail-row"><dt>Responsable</dt><dd>{{ pago.responsable }}</dd></div>
     </dl>
     <button modal-footer class="human-resources__button" type="button" (click)="selectedPayment = null">Cerrar</button>
   </app-modal>

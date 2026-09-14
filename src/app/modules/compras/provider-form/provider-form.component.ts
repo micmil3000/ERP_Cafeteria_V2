@@ -1,6 +1,6 @@
 import { Component, input, OnInit, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import type { Provider } from '../purchases-page/purchases-page.component';
+import { Proveedor } from '../../../models/proveedor.model';
 
 @Component({
   imports: [ReactiveFormsModule],
@@ -13,15 +13,14 @@ import type { Provider } from '../purchases-page/purchases-page.component';
 export class ProviderFormComponent implements OnInit {
   //Datos que recibe el componente para definir el modo de operación y el posible proveedor a editar
   readonly mode = input<'CREATE' | 'EDIT'>('CREATE');
-  readonly provider = input<Provider | null>(null);
+  readonly provider = input<Proveedor | null>(null);
   //Eventos que emite el componente al guardar o cancelar la operación
-  readonly save = output<Omit<Provider, 'id' | 'estado'>>();
+  readonly save = output<Omit<Proveedor, 'id' | 'estado'>>();
   readonly cancel = output<void>();
 
   //Formulario reactivo con los campos y validaciones necesarias
   protected readonly form = new FormGroup({
     nombre: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
-    contacto: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
     telefono: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
     correo: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
     direccion: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
@@ -44,6 +43,6 @@ export class ProviderFormComponent implements OnInit {
     this.form.markAllAsTouched();
     if (this.form.invalid) return;
     const v = this.form.getRawValue();
-    this.save.emit({ nombre: v.nombre.trim(), contacto: v.contacto.trim(), telefono: v.telefono.trim(), correo: v.correo.trim(), direccion: v.direccion.trim() });
+    this.save.emit({ nombre: v.nombre.trim(), telefono: v.telefono.trim(), correo: v.correo.trim(), direccion: v.direccion.trim() });
   }
 }

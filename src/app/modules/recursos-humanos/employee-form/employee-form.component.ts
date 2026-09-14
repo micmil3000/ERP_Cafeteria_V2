@@ -1,7 +1,6 @@
 import { Component, input, OnInit, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import type { Employee } from '../human-resources-page/human-resources-page.component';
-
+import { Funcionario } from '../../../models/funcionario.model';
 @Component({
   imports: [ReactiveFormsModule],
   selector: 'app-employee-form',
@@ -10,8 +9,8 @@ import type { Employee } from '../human-resources-page/human-resources-page.comp
 })
 export class EmployeeFormComponent implements OnInit {
   //Variables para recibir y enviar los datos del trabajador
-  readonly employee = input<Employee | null>(null);
-  readonly save = output<Omit<Employee, 'id' | 'estado'>>();
+  readonly employee = input<Funcionario | null>(null);
+  readonly save = output<Omit<Funcionario, 'id' | 'estado' | 'rol'>>();
   readonly cancel = output<void>();
   //Campos que se muestran en el formulario
   protected readonly fields = [

@@ -1,5 +1,5 @@
 import { Component, input, output } from '@angular/core';
-import type { CartItem } from '../sales-page/sales-page.component';
+import { CarritoVenta as CartItem } from '../../../models/venta.model';
 
 @Component({
   imports: [],

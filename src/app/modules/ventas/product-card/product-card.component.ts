@@ -1,6 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { BadgeComponent } from '../../../shared/badge/badge.component';
-import type { Product } from '../sales-page/sales-page.component';
+import { ProductoVenta as Product } from '../../../models/venta.model';
 
 @Component({
   imports: [BadgeComponent],

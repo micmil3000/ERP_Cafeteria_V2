@@ -1,53 +1,36 @@
-import { Component } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+
 import { FormsModule } from '@angular/forms';
+
 import { PageHeaderComponent } from '../../../shared/page-header/page-header.component';
+
 import { TabsComponent } from '../../../shared/tabs/tabs.component';
+
 import { BadgeComponent } from '../../../shared/badge/badge.component';
+
 import { DataTableComponent } from '../../../shared/data-table/data-table.component';
+
 import { ModalComponent } from '../../../shared/modal/modal.component';
+
 import { ConfirmDialogComponent } from '../../../shared/confirm-dialog/confirm-dialog.component';
+
 import { ProviderFormComponent } from '../provider-form/provider-form.component';
+
 import { ProviderProductsDrawerComponent } from '../provider-products-drawer/provider-products-drawer.component';
+
 import { PurchaseDetailModalComponent } from '../purchase-detail-modal/purchase-detail-modal.component';
 
-export interface Provider {
-  readonly id: number;
-  readonly nombre: string;
-  readonly contacto: string;
-  readonly telefono: string;
-  readonly correo: string;
-  readonly direccion: string;
-  readonly estado: 'ACTIVO' | 'INACTIVO';
-}
-export interface Product {
-  readonly id: number;
-  readonly nombre: string;
-  readonly categoria: string;
-  readonly stockActual: number;
-  readonly stockMinimo: number;
-}
-export interface ProviderProduct {
-  readonly proveedorId: number;
-  readonly productoId: number;
-  readonly precioCompra: number;
-}
-export interface PurchaseDetail {
-  readonly productoId: number;
-  readonly nombre: string;
-  readonly cantidad: number;
-  readonly precioCompra: number;
-}
-export interface Purchase {
-  readonly id: number;
-  readonly fechaHora: string;
-  readonly proveedorId: number;
-  readonly proveedorNombre: string;
-  readonly detalles: readonly PurchaseDetail[];
-  readonly subtotal: number;
-  readonly iva: number;
-  readonly total: number;
-  readonly usuarioResponsable: string;
-}
+import { Proveedor } from '../../../models/proveedor.model';
+
+import { Producto } from '../../../models/producto.model';
+
+import { Compra, DetalleCompra, NuevaCompra } from '../../../models/compra.model';
+
+import { ProductoService } from '../../../services/producto.service';
+
+import { ProductoProveedorDetalle, ProveedorService } from '../../../services/proveedor.service';
+
+import { CompraService } from '../../../services/compra.service';
 
 @Component({
   imports: [FormsModule, PageHeaderComponent, TabsComponent, BadgeComponent, DataTableComponent, ModalComponent,
@@ -56,201 +39,396 @@ export interface Purchase {
   styleUrl: './purchases-page.component.css',
   templateUrl: './purchases-page.component.html',
 })
-export class PurchasesPageComponent {
-  //Variables para manejar todas las funcionalidades. Son de prueba
+
+export class PurchasesPageComponent implements OnInit {
+
+  //Variables para manejar las funcionalidades de compras y proveedores
   protected readonly currentRole: 'GERENTE' | 'TRABAJADOR' = 'GERENTE';
   protected readonly tabs = [{ id: 'purchases', label: 'Compras' }, { id: 'providers', label: 'Proveedores' }];
   protected activeTab = 'purchases';
   protected purchaseView = 'new';
   protected search = '';
-  protected selectedProviderId: number | null = null;
-  protected cart: readonly { productoId: number; cantidad: number }[] = [];
+  protected selectedProviderId : number | null = null;
+  protected cart : { productoProveedorId : number; productoId : number; cantidad : number }[] = [];
   protected providerFormOpen = false;
-  protected editingProvider: Provider | null = null;
-  protected drawerProviderId: number | null = null;
-  protected pendingDeactivation: Provider | null = null;
+  protected editingProvider : Proveedor | null = null;
+  protected drawerProviderId : number | null = null;
+  protected pendingDeactivation : Proveedor | null = null;
   protected confirmingPurchase = false;
-  protected selectedPurchase: Purchase | null = null;
+  protected selectedPurchase : Compra | null = null;
   protected notice = '';
 
-  //Arreglos de información de prueba para proveedores, productos, productos asociados y compras
-  protected providers: readonly Provider[] = [
-    { id: 1, nombre: 'Café Sierra Dorada', contacto: 'Mariana Ruiz', telefono: '3315872460', correo: 'ventas@sierra.example', direccion: 'Av. Vallarta 1840, Guadalajara', estado: 'ACTIVO' },
-    { id: 2, nombre: 'Insumos Café del Centro', contacto: 'Carlos Navarro', telefono: '3326741958', correo: 'pedidos@insumoscentro.example', direccion: 'Calle Morelos 625, Guadalajara', estado: 'ACTIVO' },
-    { id: 3, nombre: 'Horno y Dulce Artesanal', contacto: 'Sofía Ramírez', telefono: '3337614285', correo: 'contacto@hornodulce.example', direccion: 'Av. Federalismo 910, Guadalajara', estado: 'ACTIVO' },
-    { id: 4, nombre: 'Lácteos Santa Clara', contacto: 'Ricardo Salazar', telefono: '3348523176', correo: 'ventas@santaclara.example', direccion: 'Calle Fresno 142, Guadalajara', estado: 'INACTIVO' },
-  ];
+  //Datos cargados desde el backend
+  protected providers : Proveedor[] = [];
+  protected products : Producto[] = [];
+  protected associations : ProductoProveedorDetalle[] = [];
+  protected purchases : Compra[] = [];
 
-  protected products: readonly Product[] = [
-    { id: 1, nombre: 'Latte Vainilla', categoria: 'Cafés', stockActual: 18, stockMinimo: 5 },
-    { id: 2, nombre: 'Capuchino', categoria: 'Cafés', stockActual: 3, stockMinimo: 5 },
-    { id: 3, nombre: 'Americano', categoria: 'Cafés', stockActual: 26, stockMinimo: 8 },
-    { id: 4, nombre: 'Mocha', categoria: 'Cafés', stockActual: 7, stockMinimo: 4 },
-    { id: 5, nombre: 'Frappé de Café', categoria: 'Bebidas frías', stockActual: 2, stockMinimo: 4 },
-    { id: 6, nombre: 'Té Matcha', categoria: 'Tés', stockActual: 10, stockMinimo: 4 },
-    { id: 7, nombre: 'Rol de Canela', categoria: 'Panadería', stockActual: 2, stockMinimo: 3 },
-    { id: 8, nombre: 'Pastel de Chocolate', categoria: 'Postres', stockActual: 1, stockMinimo: 2 },
-  ];
+  constructor(
+    private proveedorService : ProveedorService,
+    private productoService : ProductoService,
+    private compraService : CompraService,
+    private cdr : ChangeDetectorRef
+  ) {}
 
-  protected associations: readonly ProviderProduct[] = [
-    { proveedorId: 1, productoId: 1, precioCompra: 33 },
-    { proveedorId: 1, productoId: 2, precioCompra: 30 },
-    { proveedorId: 1, productoId: 3, precioCompra: 20 },
-    { proveedorId: 1, productoId: 5, precioCompra: 38 },
-    { proveedorId: 2, productoId: 1, precioCompra: 32 },
-    { proveedorId: 2, productoId: 4, precioCompra: 37 },
-    { proveedorId: 2, productoId: 6, precioCompra: 28 },
-    { proveedorId: 3, productoId: 7, precioCompra: 21 },
-    { proveedorId: 3, productoId: 8, precioCompra: 40 },
-    { proveedorId: 4, productoId: 2, precioCompra: 29 },
-  ];
+  ngOnInit(): void {
 
-  protected purchases: readonly Purchase[] = [
-    this.mockPurchase(301, 1, 3, 15, 19, '2026-09-01T08:45:00-06:00'),
-    this.mockPurchase(302, 3, 7, 10, 20, '2026-09-02T11:15:00-06:00'),
-    this.mockPurchase(303, 2, 6, 12, 27, '2026-09-04T09:30:00-06:00'),
-    this.mockPurchase(304, 1, 2, 8, 29, '2026-09-06T10:20:00-06:00'),
-  ];
+    this.cargarProveedores();
+    this.cargarProductos();
+    this.cargarCompras();
 
-  //Métodos para obtener o calcular la información para pruebas
-  protected get activeProviders() { return this.providers.filter((p) => p.estado === 'ACTIVO'); }
-  protected get filteredProviders() {
-    const query = this.search.trim().toLocaleLowerCase('es-MX');
-    return this.providers.filter((p) => (p.nombre + ' ' + p.contacto).toLocaleLowerCase('es-MX').includes(query));
   }
-  protected get drawerProvider() { return this.providers.find((p) => p.id === this.drawerProviderId); }
-  protected get availableProducts() {
-    if (!this.activeProviders.some((p) => p.id === this.selectedProviderId)) return [];
-    return this.associations.filter((a) => a.proveedorId === this.selectedProviderId).map((a) => ({
-      ...this.products.find((p) => p.id === a.productoId)!, precioCompra: a.precioCompra,
-    }));
-  }
-  protected get lines(): readonly PurchaseDetail[] {
-    return this.cart.map((line) => {
-      const product = this.products.find((p) => p.id === line.productoId);
-      const association = this.associations.find((a) => a.proveedorId === this.selectedProviderId && a.productoId === line.productoId);
-      return { ...line, nombre: product?.nombre ?? 'Producto no disponible', precioCompra: association?.precioCompra ?? 0 };
+
+  //Carga los proveedores desde el backend
+  private cargarProveedores(): void {
+
+    this.proveedorService.obtenerProveedores().subscribe({
+      next: (proveedores) => {
+        this.providers = proveedores;
+        this.cargarTodasLasAsociaciones();
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al cargar proveedores: ', error);
+        this.notice = 'No fue posible cargar los proveedores';
+        this.cdr.markForCheck();
+      }
     });
+
   }
-  protected get subtotal(): number {
-    return this.lines.reduce((sum, line) => sum + (Number.isInteger(line.cantidad) && line.cantidad > 0
-      ? Math.round(line.precioCompra * 100) * line.cantidad : 0), 0) / 100;
+
+  //Carga los productos generales desde el backend
+  private cargarProductos(): void {
+
+    this.productoService.obtenerProductos().subscribe({
+      next: (productos) => {
+        this.products = productos;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al cargar productos: ', error);
+        this.notice = 'No fue posible cargar los productos';
+        this.cdr.markForCheck();
+      }
+    });
+
   }
-  protected get iva(): number { return Math.round(Math.round(this.subtotal * 100) * 0.16) / 100; }
-  protected get total(): number { return (Math.round(this.subtotal * 100) + Math.round(this.iva * 100)) / 100; }
-  protected get canConfirm(): boolean {
-    return this.currentRole === 'GERENTE' && this.activeProviders.some((p) => p.id === this.selectedProviderId) &&
-      this.lines.length > 0 && this.lines.every((l) => Number.isInteger(l.cantidad) && l.cantidad > 0 && l.cantidad <= 1000000 &&
-        this.validPrice(l.precioCompra) && this.products.some((p) => p.id === l.productoId));
+
+  //Carga el historial de compras
+  private cargarCompras(): void {
+
+    this.compraService.obtenerCompras().subscribe({
+      next: (compras) => {
+        this.purchases = compras;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al cargar compras: ', error);
+        this.notice = 'No fue posible cargar las compras';
+        this.cdr.markForCheck();
+      }
+    });
+
   }
-  protected associationCount(providerId: number): number { return this.associations.filter((a) => a.proveedorId === providerId).length; }
-  protected money(value: number): string { return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value); }
-  protected date(value: string): string {
+
+  //Carga las relaciones de productos de cada proveedor
+  private cargarTodasLasAsociaciones(): void {
+
+    this.associations = [];
+
+    this.providers.forEach((proveedor) => {
+      this.proveedorService.obtenerProductos(proveedor.id).subscribe({
+        next: (productos) => {
+          this.associations = [
+            ...this.associations.filter((producto) => producto.proveedorId !== proveedor.id),
+            ...productos
+          ];
+          this.cdr.markForCheck();
+        },
+        error: (error) => {
+          console.error('Error al cargar productos del proveedor: ', error);
+        }
+      });
+    });
+
+  }
+
+  protected get activeProviders() : Proveedor[] {
+    return this.providers.filter((proveedor) => proveedor.estado === 'ACTIVO');
+  }
+
+  protected get filteredProviders() : Proveedor[] {
+    const query = this.search.trim().toLocaleLowerCase('es-MX');
+    return this.providers.filter((proveedor) => proveedor.nombre.toLocaleLowerCase('es-MX').includes(query));
+  }
+
+  protected get drawerProvider() : Proveedor | undefined {
+    return this.providers.find((proveedor) => proveedor.id === this.drawerProviderId);
+  }
+
+  protected get availableProducts() : ProductoProveedorDetalle[] {
+    return this.associations.filter((producto) => producto.proveedorId === this.selectedProviderId);
+  }
+
+  protected get lines() : DetalleCompra[] {
+
+    return this.cart.map((linea) => {
+      const relacion = this.associations.find((producto) => producto.id === linea.productoProveedorId);
+
+      return {
+        id: relacion?.id ?? 0,
+        productoId: linea.productoId,
+        nombre: relacion?.nombre ?? 'Producto no disponible',
+        cantidad: linea.cantidad,
+        precioCompra: Number(relacion?.precioCompra ?? 0),
+        subtotal: Number(relacion?.precioCompra ?? 0) * linea.cantidad
+      };
+    });
+
+  }
+
+  protected get subtotal() : number {
+    return this.lines.reduce((total, linea) => total + Math.round(linea.precioCompra * 100) * linea.cantidad, 0) / 100;
+  }
+
+  protected get iva() : number {
+    return Math.round(Math.round(this.subtotal * 100) * 0.16) / 100;
+  }
+
+  protected get total() : number {
+    return (Math.round(this.subtotal * 100) + Math.round(this.iva * 100)) / 100;
+  }
+
+  protected get canConfirm() : boolean {
+    return this.currentRole === 'GERENTE' && this.selectedProviderId !== null && this.cart.length > 0 &&
+      this.cart.every((linea) => Number.isInteger(linea.cantidad) && linea.cantidad > 0 && linea.cantidad <= 1000000);
+  }
+
+  protected associationCount(proveedorId : number) : number {
+    return this.associations.filter((producto) => producto.proveedorId === proveedorId).length;
+  }
+
+  protected money(value : number) : string {
+    return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(value);
+  }
+
+  protected date(value : string) : string {
     return new Intl.DateTimeFormat('es-MX', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Mexico_City' }).format(new Date(value));
-  }
-  private validPrice(value: number): boolean {
-    return Number.isFinite(value) && value > 0 && value <= 1000000 && Math.abs(value * 100 - Math.round(value * 100)) < 0.000001;
   }
 
   //Método para abrir el modal de agregar o editar proveedor
-  protected openProvider(provider: Provider | null = null): void {
-    if (this.currentRole !== 'GERENTE') return;
-    this.editingProvider = provider;
+  protected openProvider(proveedor : Proveedor | null = null): void {
+    this.editingProvider = proveedor;
     this.providerFormOpen = true;
   }
-  //Método para guardar un nuevo proveedor 
-  protected saveProvider(value: Omit<Provider, 'id' | 'estado'>): void {
-    if (this.currentRole !== 'GERENTE' || !this.providerFormOpen) return;
-    this.providers = this.editingProvider
-      ? this.providers.map((p) => p.id === this.editingProvider!.id ? { ...p, ...value } : p)
-      : [...this.providers, { ...value, id: Math.max(0, ...this.providers.map((p) => p.id)) + 1, estado: 'ACTIVO' }];
-    this.providerFormOpen = false;
-    this.editingProvider = null;
-    this.notice = 'Proveedor guardado correctamente.';
+
+  //Método para guardar un nuevo proveedor o sus cambios
+  protected saveProvider(proveedor : Omit<Proveedor, 'id' | 'estado'>): void {
+
+    const solicitud = this.editingProvider
+      ? this.proveedorService.editarProveedor(this.editingProvider.id, proveedor)
+      : this.proveedorService.registrarProveedor(proveedor);
+
+    solicitud.subscribe({
+      next: () => {
+        this.providerFormOpen = false;
+        this.editingProvider = null;
+        this.notice = 'Proveedor guardado correctamente.';
+        this.cargarProveedores();
+      },
+      error: (error) => {
+        console.error('Error al guardar proveedor: ', error);
+        this.notice = 'No fue posible guardar el proveedor';
+        this.cdr.markForCheck();
+      }
+    });
+
   }
+
   //Método para "eliminar" o desactivar un proveedor
   protected deactivateProvider(): void {
-    if (this.currentRole !== 'GERENTE' || !this.pendingDeactivation) return;
-    const id = this.pendingDeactivation.id;
-    this.providers = this.providers.map((p) => p.id === id ? { ...p, estado: 'INACTIVO' } : p);
-    if (this.selectedProviderId === id) this.changeProvider(null);
-    this.pendingDeactivation = null;
-    this.notice = 'Proveedor desactivado. Se conserva para consulta.';
+
+    if(!this.pendingDeactivation) return;
+
+    this.proveedorService.desactivarProveedor(this.pendingDeactivation.id).subscribe({
+      next: () => {
+        this.pendingDeactivation = null;
+        this.selectedProviderId = null;
+        this.cart = [];
+        this.notice = 'Proveedor desactivado. Se conserva para consulta.';
+        this.cargarProveedores();
+      },
+      error: (error) => {
+        console.error('Error al desactivar proveedor: ', error);
+        this.notice = 'No fue posible desactivar el proveedor';
+        this.cdr.markForCheck();
+      }
+    });
+
   }
-  //Método para agregar un nuevo producto asociado a un proveedor en específico
-  protected addAssociation(value: { productoId: number; precioCompra: number }): void {
-    const id = this.drawerProviderId;
-    if (this.currentRole !== 'GERENTE' || !this.drawerProvider || !id || !this.validPrice(value.precioCompra) ||
-      !this.products.some((p) => p.id === value.productoId) ||
-      this.associations.some((a) => a.proveedorId === id && a.productoId === value.productoId)) return;
-    this.associations = [...this.associations, { proveedorId: id, ...value }];
+
+  //Método para agregar un producto asociado al proveedor
+  protected addAssociation(value : { productoId : number; precioCompra : number }): void {
+
+    if(this.drawerProviderId === null) return;
+
+    this.proveedorService.registrarProducto(this.drawerProviderId, value).subscribe({
+      next: () => {
+        this.notice = 'Producto asociado correctamente.';
+        this.cargarProveedores();
+      },
+      error: (error) => {
+        console.error('Error al asociar producto: ', error);
+        this.notice = 'No fue posible asociar el producto';
+        this.cdr.markForCheck();
+      }
+    });
+
   }
-  //Método para actualizar precio de un producto del proveedor
-  protected updatePrice(value: { productoId: number; precioCompra: number }): void {
-    if (this.currentRole !== 'GERENTE' || !this.drawerProvider || !this.validPrice(value.precioCompra)) return;
-    this.associations = this.associations.map((a) => a.proveedorId === this.drawerProviderId && a.productoId === value.productoId
-      ? { ...a, precioCompra: value.precioCompra } : a);
+
+  //Método para actualizar el precio del producto
+  protected updatePrice(value : { productoId : number; precioCompra : number }): void {
+
+    if(this.drawerProviderId === null) return;
+
+    const relacion = this.associations.find((producto) =>
+      producto.proveedorId === this.drawerProviderId && producto.productoId === value.productoId
+    );
+
+    if(!relacion) return;
+
+    this.proveedorService.actualizarPrecio(this.drawerProviderId, relacion.id, value.precioCompra).subscribe({
+      next: () => {
+        this.notice = 'Precio actualizado correctamente.';
+        this.cargarProveedores();
+      },
+      error: (error) => {
+        console.error('Error al actualizar precio: ', error);
+        this.notice = 'No fue posible actualizar el precio';
+        this.cdr.markForCheck();
+      }
+    });
+
   }
-  //Método para eliminar una asociación de un proveedor con un producto
-  protected removeAssociation(productoId: number): void {
-    if (this.currentRole !== 'GERENTE' || !this.drawerProvider) return;
-    this.associations = this.associations.filter((a) => !(a.proveedorId === this.drawerProviderId && a.productoId === productoId));
-    if (this.selectedProviderId === this.drawerProviderId) this.removeLine(productoId);
+
+  //Método para eliminar la relación de un producto
+  protected removeAssociation(productoId : number): void {
+
+    if(this.drawerProviderId === null) return;
+
+    const relacion = this.associations.find((producto) =>
+      producto.proveedorId === this.drawerProviderId && producto.productoId === productoId
+    );
+
+    if(!relacion) return;
+
+    this.proveedorService.eliminarProducto(this.drawerProviderId, relacion.id).subscribe({
+      next: () => {
+        this.notice = 'Relación eliminada correctamente.';
+        this.removeLine(productoId);
+        this.cargarProveedores();
+      },
+      error: (error) => {
+        console.error('Error al eliminar relación: ', error);
+        this.notice = 'No fue posible eliminar la relación';
+        this.cdr.markForCheck();
+      }
+    });
+
   }
-  //Método para seleccionar un proveedor al realizar una compra
-  protected changeProvider(id: number | null): void {
-    if (this.currentRole !== 'GERENTE') return;
-    this.selectedProviderId = this.activeProviders.some((p) => p.id === id) ? id : null;
+
+  protected changeProvider(id : number | null): void {
+    this.selectedProviderId = id;
     this.cart = [];
-    this.notice = '';
   }
-  //Método para agregar producto a la compra
-  protected addProduct(id: number): void {
-    if (this.currentRole !== 'GERENTE' || !this.availableProducts.some((p) => p.id === id)) return;
-    const line = this.cart.find((l) => l.productoId === id);
-    if (line) this.setQuantity(id, line.cantidad + 1);
-    else this.cart = [...this.cart, { productoId: id, cantidad: 1 }];
+
+  //Método para agregar un producto a la compra
+  protected addProduct(productoId : number): void {
+
+    const relacion = this.availableProducts.find((producto) => producto.productoId === productoId);
+
+    if(!relacion) return;
+
+    const linea = this.cart.find((producto) => producto.productoProveedorId === relacion.id);
+
+    if(linea) {
+      this.setQuantity(productoId, linea.cantidad + 1);
+      return;
+    }
+
+    this.cart = [...this.cart, {
+      productoProveedorId: relacion.id,
+      productoId: relacion.productoId,
+      cantidad: 1
+    }];
+
   }
-  //Método para ajustar la cantidad de un producto de la compra
-  protected setQuantity(id: number, value: number | null): void {
-    if (this.currentRole !== 'GERENTE') return;
-    this.cart = this.cart.map((l) => l.productoId === id ? { ...l, cantidad: value ?? 0 } : l);
+
+  protected setQuantity(productoId : number, cantidad : number | null): void {
+    this.cart = this.cart.map((linea) => linea.productoId === productoId ? { ...linea, cantidad: cantidad ?? 0 } : linea);
   }
-  //Método para quitar un producto de la compra
-  protected removeLine(id: number): void {
-    if (this.currentRole !== 'GERENTE') return;
-    this.cart = this.cart.filter((l) => l.productoId !== id);
+
+  protected removeLine(productoId : number): void {
+    this.cart = this.cart.filter((linea) => linea.productoId !== productoId);
   }
-  //Método para mostrar modal de confirmación
+
   protected requestConfirmation(): void {
-    if (this.canConfirm) this.confirmingPurchase = true;
+    if(this.canConfirm) this.confirmingPurchase = true;
   }
-  //Método para confirmar la compra y guardarla
+
+  //Método para confirmar y registrar la compra
   protected confirmPurchase(): void {
-    if (!this.confirmingPurchase || !this.canConfirm) { this.confirmingPurchase = false; return; }
-    const provider = this.activeProviders.find((p) => p.id === this.selectedProviderId)!;
-    const purchase: Purchase = {
-      id: Math.max(0, ...this.purchases.map((p) => p.id)) + 1,
-      fechaHora: new Date().toISOString(), proveedorId: provider.id, proveedorNombre: provider.nombre,
-      detalles: this.lines.map((line) => ({ ...line })), subtotal: this.subtotal, iva: this.iva, total: this.total,
-      usuarioResponsable: 'Ana Torres',
+
+    if(!this.confirmingPurchase || !this.canConfirm || this.selectedProviderId === null) {
+      this.confirmingPurchase = false;
+      return;
+    }
+
+    const compra : NuevaCompra = {
+      proveedorId: this.selectedProviderId,
+      usuarioId: 1,
+      metodoPago: null,
+      detalles: this.cart.map((linea) => ({
+        productoProveedorId: linea.productoProveedorId,
+        cantidad: linea.cantidad
+      }))
     };
-    this.products = this.products.map((p) => ({ ...p,
-      stockActual: p.stockActual + (purchase.detalles.find((l) => l.productoId === p.id)?.cantidad ?? 0),
-    }));
-    this.purchases = [purchase, ...this.purchases];
-    this.cart = [];
-    this.selectedProviderId = null;
-    this.confirmingPurchase = false;
-    this.notice = 'Compra #' + purchase.id + ' registrada correctamente.';
-    this.purchaseView = 'history';
+
+    this.compraService.registrarCompra(compra).subscribe({
+      next: (respuesta) => {
+        this.cart = [];
+        this.selectedProviderId = null;
+        this.confirmingPurchase = false;
+        this.notice = 'Compra #' + respuesta.id + ' registrada correctamente.';
+        this.purchaseView = 'history';
+        this.cargarCompras();
+        this.cargarProductos();
+      },
+      error: (error) => {
+        console.error('Error al registrar compra: ', error);
+        this.confirmingPurchase = false;
+        this.notice = 'No fue posible registrar la compra';
+        this.cdr.markForCheck();
+      }
+    });
+
   }
-  //Método para generar una compra de prueba
-  private mockPurchase(id: number, providerId: number, productId: number, quantity: number, price: number, date: string): Purchase {
-    const cents = Math.round(price * 100) * quantity;
-    const tax = Math.round(cents * 0.16);
-    return { id, fechaHora: date, proveedorId: providerId, proveedorNombre: this.providers.find((p) => p.id === providerId)!.nombre,
-      detalles: [{ productoId: productId, nombre: this.products.find((p) => p.id === productId)!.nombre, cantidad: quantity, precioCompra: price }],
-      subtotal: cents / 100, iva: tax / 100, total: (cents + tax) / 100, usuarioResponsable: 'Ana Torres' };
+
+  //Consulta el detalle de una compra
+  protected openPurchaseDetail(compra : Compra): void {
+
+    this.compraService.obtenerCompraPorId(compra.id).subscribe({
+      next: (detalle) => {
+        this.selectedPurchase = detalle;
+        this.cdr.markForCheck();
+      },
+      error: (error) => {
+        console.error('Error al consultar compra: ', error);
+        this.notice = 'No fue posible consultar la compra';
+        this.cdr.markForCheck();
+      }
+    });
+
   }
+
 }

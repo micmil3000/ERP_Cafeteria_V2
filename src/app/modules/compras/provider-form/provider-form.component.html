@@ -7,11 +7,6 @@
     <span class="provider-form__error" id="provider-name-error">@if (invalid('nombre')) { Escribe el nombre del proveedor. }</span>
   </div>
   <div class="provider-form__field">
-    <label class="provider-form__label" for="provider-contact">Contacto</label>
-    <input class="provider-form__input" id="provider-contact" type="text" formControlName="contacto" required [attr.aria-invalid]="invalid('contacto')" aria-describedby="provider-contact-error" />
-    <span class="provider-form__error" id="provider-contact-error">@if (invalid('contacto')) { Escribe el nombre del contacto. }</span>
-  </div>
-  <div class="provider-form__field">
     <label class="provider-form__label" for="provider-phone">Teléfono</label>
     <input class="provider-form__input" id="provider-phone" type="tel" formControlName="telefono" required [attr.aria-invalid]="invalid('telefono')" aria-describedby="provider-phone-error" />
     <span class="provider-form__error" id="provider-phone-error">@if (invalid('telefono')) { Escribe un teléfono. }</span>
