@@ -1,64 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const funcionarioService = require('../services/funcionario.service');
+const funcionarioController = require('../controllers/funcionario.controller');
 
 //Ruta para obtener todos los funcionarios
-router.get('/', (req, res) => {
-    //Llama al método de funcionarioService para obtener todos los funcionarios
-    funcionarioService.obtenerFuncionarios(
-        (error, funcionarios) => {
-            if(error) {
-                return res.status(500).json({
-                    mensaje: 'Error al consultar funcionarios'
-                });
-            }
-            //Devuelve funcionarios encontrados
-            res.json(funcionarios);
-        }
-    );
-});
+router.get('/', funcionarioController.obtenerFuncionarios);
 
 //Función para obtener un funcionario en base a su ID
-router.get('/:id/horario', (req, res) => {
-    funcionarioService.obtenerHorario(req.params.id, (error, horario) => {
-        if(error) return res.status(500).json({ mensaje: 'Error al consultar horario' });
-        res.json(horario);
-    });
-});
+router.get('/:id/horario', funcionarioController.obtenerHorario);
 
-router.get('/:id/asistencias', (req, res) => {
-    funcionarioService.obtenerAsistencias(req.params.id, (error, asistencias) => {
-        if(error) return res.status(500).json({ mensaje: 'Error al consultar asistencias' });
-        res.json(asistencias);
-    });
-});
+router.get('/:id/asistencias', funcionarioController.obtenerAsistencias);
 
-router.get('/:id/pagos', (req, res) => {
-    funcionarioService.obtenerPagos(req.params.id, (error, pagos) => {
-        if(error) return res.status(500).json({ mensaje: 'Error al consultar pagos' });
-        res.json(pagos);
-    });
-});
+router.get('/:id/pagos', funcionarioController.obtenerPagos);
 
-router.get('/:id', (req, res) => {
-    const id = req.params.id;
-
-    funcionarioService.obtenerFuncionarioPorId(id, (error, funcionario) => {
-        //Maneja errores al consultar el funcionario
-        if(error) {
-            return res.status(500).json({
-                mensaje: 'Error al consultar funcionario'
-            });
-        }
-        //Maneja error si no encuentra ningún funcionario con ese ID
-        if(!funcionario) {
-            return res.status(404).json({
-                mensaje: 'Funcionario no encontrado'
-            });
-        }
-        //Devuelve el funcionario encontrado
-        res.json(funcionario);
-    });
-});
+router.get('/:id', funcionarioController.obtenerFuncionarioPorId);
 
 module.exports = router;
